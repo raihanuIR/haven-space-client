@@ -1,0 +1,549 @@
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import {
+  MapPin,
+  Bed,
+  Bath,
+  Maximize2,
+  Calendar,
+  Heart,
+  Share2,
+  ShieldCheck,
+  Star,
+  User,
+  Phone,
+  Mail,
+  CheckCircle,
+  AlertCircle,
+  Clock,
+  Home,
+} from 'lucide-react';
+import API from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import BookingModal from '../components/BookingModal';
+import StripePaymentModal from '../components/StripePaymentModal';
+import ShareModal from '../components/ShareModal';
+import LoadingSpinner from '../components/LoadingSpinner';
+
+const PropertyDetails = () => {
+  const { id } = useParams();
+  const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  const [property, setProperty] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [favLoading, setFavLoading] = useState(false);
+
+  // Modals
+  const [bookingModalOpen, setBookingModalOpen] = useState(false);
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [confirmedBookingData, setConfirmedBookingData] = useState(null);
+
+  // Reviews
+  const [reviews, setReviews] = useState([]);
+  const [newRating, setNewRating] = useState(5);
+  const [newComment, setNewComment] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [reviewMessage, setReviewMessage] = useState('');
+
+  useEffect(() => {
+    const fetchPropertyData = async () => {
+      try {
+        const [propRes, reviewRes, favRes] = await Promise.all([
+          API.get(`/properties/${id}`),
+          API.get(`/reviews/property/${id}`),
+          isAuthenticated ? API.get('/favorites') : Promise.resolve({ data: { favorites: [] } }),
+        ]);
+
+        if (propRes.data.success) {
+          setProperty(propRes.data.property);
+        }
+        if (reviewRes.data.success) {
+          setReviews(reviewRes.data.reviews);
+        }
+        if (favRes.data?.success) {
+          const hasFav = favRes.data.favorites.some((f) => f.propertyId?._id === id || f.propertyId === id);
+          setIsFavorite(hasFav);
+        }
+      } catch (err) {
+        console.error('Fetch property details error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPropertyData();
+  }, [id, isAuthenticated]);
+
+  const handleToggleFavorite = async () => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
+    setFavLoading(true);
+    try {
+      if (isFavorite) {
+        await API.delete(`/favorites/${id}`);
+        setIsFavorite(false);
+      } else {
+        await API.post('/favorites', { propertyId: id });
+        setIsFavorite(true);
+      }
+    } catch (err) {
+      console.error('Toggle favorite error:', err);
+    } finally {
+      setFavLoading(false);
+    }
+  };
+
+  const handleProceedToPayment = (bookingDetails) => {
+    setConfirmedBookingData(bookingDetails);
+    setBookingModalOpen(false);
+    setPaymentModalOpen(true);
+  };
+
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
+
+    setSubmittingReview(true);
+    try {
+      const { data } = await API.post('/reviews', {
+        propertyId: id,
+        rating: newRating,
+        comment: newComment.trim(),
+      });
+
+      if (data.success) {
+        setReviews([data.review, ...reviews]);
+        setNewComment('');
+        setReviewMessage('Thank you! Your review has been published.');
+        setTimeout(() => setReviewMessage(''), 4000);
+      }
+    } catch (err) {
+      console.error('Submit review error:', err);
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
+  if (loading) {
+    return <LoadingSpinner text="Loading property details..." />;
+  }
+
+  if (!property) {
+    return (
+      <div className="container" style={{ padding: '5rem 0', textAlign: 'center' }}>
+        <h2>Property Not Found</h2>
+        <p style={{ color: 'var(--text-muted)', margin: '1rem 0 2rem 0' }}>
+          The requested listing is unavailable or has been removed.
+        </p>
+        <button onClick={() => navigate('/properties')} className="btn btn-primary">
+          Back to Listings
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="page-wrapper" style={{ padding: '2.5rem 0 5rem 0' }}>
+      <div className="container">
+        {/* Title & Quick Actions */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+          <div>
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center' }}>
+              <span className="badge badge-approved">{property.propertyType}</span>
+              <span className="badge badge-role">Verified Owner Listing</span>
+            </div>
+            <h1 style={{ fontSize: '2.2rem' }}>{property.title}</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
+              <MapPin size={16} color="var(--accent-primary)" />
+              <span>{property.location}</span>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <button
+              onClick={() => setShareModalOpen(true)}
+              className="btn btn-secondary"
+              title="Share property listing"
+            >
+              <Share2 size={18} />
+              <span>Share</span>
+            </button>
+            <button
+              onClick={handleToggleFavorite}
+              disabled={favLoading}
+              className={`btn ${isFavorite ? 'btn-danger' : 'btn-secondary'}`}
+              title={isFavorite ? 'Remove from favorites' : 'Save to favorites'}
+            >
+              <Heart size={18} fill={isFavorite ? 'currentColor' : 'none'} />
+              <span>{isFavorite ? 'Saved' : 'Favorite'}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Gallery Section */}
+        <div style={{ marginBottom: '3rem' }}>
+          <div style={{ height: '520px', borderRadius: 'var(--radius-lg)', overflow: 'hidden', marginBottom: '1rem', boxShadow: 'var(--shadow-lg)' }}>
+            <img
+              src={property.images[selectedImage] || property.images[0]}
+              alt={property.title}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'all 0.3s ease' }}
+            />
+          </div>
+
+          {/* Thumbnail Strip */}
+          {property.images.length > 1 && (
+            <div style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+              {property.images.map((img, idx) => (
+                <img
+                  key={idx}
+                  src={img}
+                  alt={`Thumbnail ${idx + 1}`}
+                  onClick={() => setSelectedImage(idx)}
+                  style={{
+                    width: '100px',
+                    height: '70px',
+                    borderRadius: 'var(--radius-sm)',
+                    objectFit: 'cover',
+                    cursor: 'pointer',
+                    border: selectedImage === idx ? '3px solid var(--accent-primary)' : '2px solid transparent',
+                    opacity: selectedImage === idx ? 1 : 0.7,
+                    transition: 'all 0.2s',
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Two-Column Layout: Details + Booking Card */}
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '3rem' }}>
+          {/* Left Column: Specs, Description, Amenities, Reviews */}
+          <div>
+            {/* Key Specs Card */}
+            <div style={{
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border-color)',
+              borderRadius: 'var(--radius-lg)',
+              padding: '1.5rem',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '1.5rem',
+              marginBottom: '2rem',
+              textAlign: 'center',
+            }}>
+              <div>
+                <Bed size={24} color="var(--accent-primary)" style={{ margin: '0 auto 0.4rem auto' }} />
+                <span style={{ display: 'block', fontWeight: 700, fontSize: '1.1rem' }}>{property.bedrooms} Bedrooms</span>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Comfortable capacity</span>
+              </div>
+              <div>
+                <Bath size={24} color="var(--accent-primary)" style={{ margin: '0 auto 0.4rem auto' }} />
+                <span style={{ display: 'block', fontWeight: 700, fontSize: '1.1rem' }}>{property.bathrooms} Bathrooms</span>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Full & half baths</span>
+              </div>
+              <div>
+                <Maximize2 size={24} color="var(--accent-primary)" style={{ margin: '0 auto 0.4rem auto' }} />
+                <span style={{ display: 'block', fontWeight: 700, fontSize: '1.1rem' }}>{property.propertySize} sqft</span>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Interior living area</span>
+              </div>
+            </div>
+
+            {/* Description */}
+            <div style={{ marginBottom: '2.5rem' }}>
+              <h2 style={{ fontSize: '1.45rem', marginBottom: '1rem' }}>About this Property</h2>
+              <p style={{ color: 'var(--text-secondary)', lineHeight: 1.8, fontSize: '1rem', whiteSpace: 'pre-line' }}>
+                {property.description}
+              </p>
+            </div>
+
+            {/* Amenities */}
+            {property.amenities && property.amenities.length > 0 && (
+              <div style={{ marginBottom: '2.5rem' }}>
+                <h2 style={{ fontSize: '1.45rem', marginBottom: '1rem' }}>Offered Amenities</h2>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.85rem' }}>
+                  {property.amenities.map((amenity, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.65rem',
+                        background: 'var(--bg-tertiary)',
+                        padding: '0.75rem 1rem',
+                        borderRadius: 'var(--radius-md)',
+                        fontSize: '0.9rem',
+                        fontWeight: 500,
+                      }}
+                    >
+                      <CheckCircle size={16} color="var(--success)" />
+                      <span>{amenity}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Extra Features */}
+            {property.extraFeatures && (
+              <div style={{ marginBottom: '2.5rem' }}>
+                <h2 style={{ fontSize: '1.45rem', marginBottom: '1rem' }}>Special Features</h2>
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '1.25rem' }}>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>{property.extraFeatures}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Review System Section */}
+            <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '2.5rem', marginTop: '3rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <h2 style={{ fontSize: '1.45rem' }}>
+                  Tenant Reviews & Ratings ({reviews.length})
+                </h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#f59e0b', fontWeight: 700 }}>
+                  <Star size={18} fill="#f59e0b" />
+                  <span>
+                    {reviews.length > 0
+                      ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
+                      : '5.0'} / 5.0
+                  </span>
+                </div>
+              </div>
+
+              {/* Review Form for logged in tenant */}
+              <div style={{
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-color)',
+                borderRadius: 'var(--radius-lg)',
+                padding: '1.5rem',
+                marginBottom: '2rem',
+              }}>
+                <h3 style={{ fontSize: '1.15rem', marginBottom: '0.75rem' }}>Write a Verified Review</h3>
+                {reviewMessage && (
+                  <div style={{ background: 'var(--success-bg)', color: 'var(--success)', padding: '0.75rem', borderRadius: 'var(--radius-md)', marginBottom: '1rem', fontSize: '0.875rem' }}>
+                    {reviewMessage}
+                  </div>
+                )}
+                <form onSubmit={handleReviewSubmit}>
+                  <div className="form-group">
+                    <label className="form-label">Your Rating</label>
+                    <div style={{ display: 'flex', gap: '0.5rem', cursor: 'pointer' }}>
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          size={24}
+                          onClick={() => setNewRating(star)}
+                          fill={newRating >= star ? '#f59e0b' : 'none'}
+                          color="#f59e0b"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Your Experience & Feedback</label>
+                    <textarea
+                      required
+                      rows="3"
+                      placeholder="Share your stay experience, owner responsiveness, neighborhood vibe..."
+                      className="form-textarea"
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={submittingReview}
+                    className="btn btn-primary btn-sm"
+                  >
+                    {submittingReview ? 'Submitting Review...' : 'Submit Review'}
+                  </button>
+                </form>
+              </div>
+
+              {/* Reviews List */}
+              {reviews.length === 0 ? (
+                <p style={{ color: 'var(--text-muted)' }}>Be the first tenant to leave a review for this property!</p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                  {reviews.map((rev) => (
+                    <div
+                      key={rev._id}
+                      style={{
+                        background: 'var(--bg-secondary)',
+                        border: '1px solid var(--border-color)',
+                        borderRadius: 'var(--radius-md)',
+                        padding: '1.25rem',
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                          <div style={{
+                            width: '36px',
+                            height: '36px',
+                            borderRadius: '50%',
+                            background: 'var(--accent-gradient)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#ffffff',
+                            fontWeight: 700,
+                            fontSize: '0.85rem',
+                          }}>
+                            {rev.name?.charAt(0) || 'U'}
+                          </div>
+                          <div>
+                            <h4 style={{ fontSize: '0.95rem' }}>{rev.name}</h4>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{rev.email}</span>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', color: '#f59e0b' }}>
+                          {[...Array(rev.rating)].map((_, i) => (
+                            <Star key={i} size={14} fill="#f59e0b" />
+                          ))}
+                        </div>
+                      </div>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.5 }}>
+                        {rev.comment}
+                      </p>
+                      <span style={{ display: 'block', color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '0.5rem' }}>
+                        {new Date(rev.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right Column: Sticky Booking & Owner Summary Card */}
+          <div>
+            <div style={{
+              position: 'sticky',
+              top: '100px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1.5rem',
+            }}>
+              {/* Booking Action Box */}
+              <div style={{
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-color)',
+                borderRadius: 'var(--radius-lg)',
+                padding: '2rem',
+                boxShadow: 'var(--shadow-xl)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.35rem', marginBottom: '1rem' }}>
+                  <span style={{ fontSize: '2.2rem', fontWeight: 800, fontFamily: 'Outfit', color: 'var(--accent-primary)' }}>
+                    ${property.rentPrice.toLocaleString()}
+                  </span>
+                  <span style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
+                    /{property.rentType?.toLowerCase()}
+                  </span>
+                </div>
+
+                <div style={{
+                  background: 'var(--bg-tertiary)',
+                  padding: '1rem',
+                  borderRadius: 'var(--radius-md)',
+                  marginBottom: '1.5rem',
+                  fontSize: '0.875rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.5rem',
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>Status</span>
+                    <span className="badge badge-approved">Available for Booking</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>Lease Type</span>
+                    <strong>{property.rentType} Term</strong>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setBookingModalOpen(true)}
+                  className="btn btn-primary btn-lg"
+                  style={{ width: '100%', marginBottom: '1rem' }}
+                >
+                  Book Property Now
+                </button>
+
+                <p style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                  Reservation deposit processed securely via Stripe.
+                </p>
+              </div>
+
+              {/* Owner Info Card */}
+              <div style={{
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-color)',
+                borderRadius: 'var(--radius-lg)',
+                padding: '1.5rem',
+              }}>
+                <h4 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Listed by Verified Owner</h4>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', marginBottom: '1rem' }}>
+                  <div style={{
+                    width: '46px',
+                    height: '46px',
+                    borderRadius: '50%',
+                    background: 'var(--accent-gradient)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#ffffff',
+                    fontWeight: 700,
+                  }}>
+                    {property.owner?.name?.charAt(0) || 'O'}
+                  </div>
+                  <div>
+                    <strong style={{ display: 'block' }}>{property.owner?.name}</strong>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{property.owner?.email}</span>
+                  </div>
+                </div>
+
+                {property.owner?.phone && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    <Phone size={15} color="var(--accent-primary)" />
+                    <span>{property.owner.phone}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Booking Modal */}
+      <BookingModal
+        property={property}
+        isOpen={bookingModalOpen}
+        onClose={() => setBookingModalOpen(false)}
+        onProceedToPayment={handleProceedToPayment}
+      />
+
+      {/* Stripe Payment Modal */}
+      <StripePaymentModal
+        bookingData={confirmedBookingData}
+        isOpen={paymentModalOpen}
+        onClose={() => setPaymentModalOpen(false)}
+      />
+
+      {/* Share Modal */}
+      <ShareModal
+        property={property}
+        isOpen={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+      />
+    </div>
+  );
+};
+
+export default PropertyDetails;
