@@ -436,6 +436,7 @@ button, input, select, textarea {
   padding: 1.5rem;
   box-shadow: var(--shadow-xl);
   margin-top: 2rem;
+  text-align: left;
 }
 
 .search-inputs-grid {
@@ -443,6 +444,20 @@ button, input, select, textarea {
   grid-template-columns: 2fr 1.5fr 1fr 1fr auto;
   gap: 1rem;
   align-items: flex-end;
+}
+
+.search-inputs-grid > * {
+  min-width: 0;
+}
+
+.search-submit-btn {
+  height: 48px;
+  padding: 0 1.5rem;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 /* Cards Grid & Property Card */
@@ -882,6 +897,31 @@ button, input, select, textarea {
 }
 
 /* Media Queries for Full Responsiveness */
+@media (max-width: 1400px) {
+  .search-inputs-grid {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1rem;
+    align-items: flex-end;
+  }
+  .search-group-location {
+    grid-column: span 4;
+  }
+  .search-group-type {
+    grid-column: span 2;
+  }
+  .search-group-min-price {
+    grid-column: span 2;
+  }
+  .search-group-max-price {
+    grid-column: span 2;
+  }
+  .search-submit-btn {
+    grid-column: span 2;
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 @media (max-width: 1024px) {
   .hero-grid {
     grid-template-columns: 1fr;
@@ -902,9 +942,6 @@ button, input, select, textarea {
   .dashboard-layout {
     grid-template-columns: 1fr;
   }
-  .search-inputs-grid {
-    grid-template-columns: 1fr 1fr;
-  }
 }
 
 @media (max-width: 768px) {
@@ -923,13 +960,33 @@ button, input, select, textarea {
   .stats-grid {
     grid-template-columns: 1fr;
   }
-  .search-inputs-grid {
-    grid-template-columns: 1fr;
-  }
   .footer-grid {
     grid-template-columns: 1fr;
   }
   .hero-content h1 {
     font-size: 2.3rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .search-inputs-grid {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.85rem;
+  }
+  .search-group-location {
+    grid-column: span 6;
+  }
+  .search-group-type {
+    grid-column: span 6;
+  }
+  .search-group-min-price {
+    grid-column: span 3;
+  }
+  .search-group-max-price {
+    grid-column: span 3;
+  }
+  .search-submit-btn {
+    grid-column: span 6;
+    width: 100%;
   }
 }

@@ -112,7 +112,7 @@ const Home = () => {
               >
                 <form onSubmit={handleSearchSubmit} className="search-inputs-grid">
                   {/* Location Input */}
-                  <div className="form-group" style={{ marginBottom: 0 }}>
+                  <div className="form-group search-group-location" style={{ marginBottom: 0 }}>
                     <label className="form-label">
                       <MapPin size={14} style={{ display: 'inline', marginRight: '4px' }} /> Location
                     </label>
@@ -126,7 +126,7 @@ const Home = () => {
                   </div>
 
                   {/* Property Type Dropdown */}
-                  <div className="form-group" style={{ marginBottom: 0 }}>
+                  <div className="form-group search-group-type" style={{ marginBottom: 0 }}>
                     <label className="form-label">Property Type</label>
                     <select
                       className="form-select"
@@ -144,7 +144,7 @@ const Home = () => {
                   </div>
 
                   {/* Min Price */}
-                  <div className="form-group" style={{ marginBottom: 0 }}>
+                  <div className="form-group search-group-min-price" style={{ marginBottom: 0 }}>
                     <label className="form-label">Min Price</label>
                     <input
                       type="number"
@@ -156,7 +156,7 @@ const Home = () => {
                   </div>
 
                   {/* Max Price */}
-                  <div className="form-group" style={{ marginBottom: 0 }}>
+                  <div className="form-group search-group-max-price" style={{ marginBottom: 0 }}>
                     <label className="form-label">Max Price</label>
                     <input
                       type="number"
@@ -168,7 +168,7 @@ const Home = () => {
                   </div>
 
                   {/* Search Button */}
-                  <button type="submit" className="btn btn-primary btn-lg" style={{ height: '48px', padding: '0 1.5rem' }}>
+                  <button type="submit" className="btn btn-primary btn-lg search-submit-btn">
                     <Search size={18} />
                     <span>Search</span>
                   </button>
