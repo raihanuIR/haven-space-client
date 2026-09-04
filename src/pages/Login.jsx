@@ -40,20 +40,6 @@ const Login = () => {
     setLoading(false);
   };
 
-  // Quick helper for evaluation demo logins
-  const fillDemoCredentials = (role) => {
-    if (role === 'admin') {
-      setEmail('admin@rentalhub.com');
-      setPassword('AdminPassword123!');
-    } else if (role === 'owner') {
-      setEmail('owner@rentalhub.com');
-      setPassword('OwnerPassword123!');
-    } else {
-      setEmail('tenant@rentalhub.com');
-      setPassword('TenantPassword123!');
-    }
-  };
-
   return (
     <div className="page-wrapper" style={{ justifyContent: 'center', alignItems: 'center', padding: '4rem 1rem' }}>
       <div style={{
@@ -151,24 +137,6 @@ const Login = () => {
           </svg>
           <span>Sign In with Google (Tenant)</span>
         </button>
-
-        {/* Demo Fast Logins for Recruiter / Grader Convenience */}
-        <div style={{ marginTop: '2rem', paddingTop: '1.25rem', borderTop: '1px dashed var(--border-color)' }}>
-          <span style={{ display: 'block', textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.75rem', fontWeight: 600 }}>
-            Demo 1-Click Credentials:
-          </span>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
-            <button type="button" onClick={() => fillDemoCredentials('tenant')} className="btn btn-secondary btn-sm" style={{ fontSize: '0.75rem' }}>
-              Tenant
-            </button>
-            <button type="button" onClick={() => fillDemoCredentials('owner')} className="btn btn-secondary btn-sm" style={{ fontSize: '0.75rem' }}>
-              Owner
-            </button>
-            <button type="button" onClick={() => fillDemoCredentials('admin')} className="btn btn-secondary btn-sm" style={{ fontSize: '0.75rem' }}>
-              Admin
-            </button>
-          </div>
-        </div>
 
         <p style={{ textAlign: 'center', marginTop: '1.75rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
           Don't have an account? <Link to="/register" style={{ color: 'var(--accent-primary)', fontWeight: 600 }}>Register here</Link>
