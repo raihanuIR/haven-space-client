@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Users,
   Building,
@@ -18,7 +19,12 @@ import RejectionFeedbackModal from '../components/RejectionFeedbackModal';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState('users'); // 'users' | 'properties' | 'bookings' | 'transactions'
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'users';
+
+  const setActiveTab = (tab) => {
+    setSearchParams({ tab });
+  };
 
   // Data states
   const [users, setUsers] = useState([]);
@@ -26,6 +32,7 @@ const AdminDashboard = () => {
   const [bookings, setBookings] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+
 
   // Pagination for Bookings and Transactions (Challenge requirement: Pagination on >= 2 pages)
   const [bookingPage, setBookingPage] = useState(1);
@@ -143,36 +150,46 @@ const AdminDashboard = () => {
           {/* Sidebar */}
           <aside className="dashboard-sidebar">
             <button
+              type="button"
               onClick={() => setActiveTab('users')}
               className={`dashboard-nav-item ${activeTab === 'users' ? 'active' : ''}`}
-              style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer', textAlign: 'left' }}
             >
               <Users size={18} />
               <span>All Users</span>
+              {users.length > 0 && (
+                <span className="badge" style={{ marginLeft: 'auto', fontSize: '0.7rem', padding: '0.15rem 0.5rem', background: activeTab === 'users' ? 'rgba(255,255,255,0.25)' : 'var(--bg-tertiary)', color: activeTab === 'users' ? '#ffffff' : 'var(--text-muted)' }}>
+                  {users.length}
+                </span>
+              )}
             </button>
 
             <button
+              type="button"
               onClick={() => setActiveTab('properties')}
               className={`dashboard-nav-item ${activeTab === 'properties' ? 'active' : ''}`}
-              style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer', textAlign: 'left' }}
             >
               <Building size={18} />
               <span>All Properties</span>
+              {properties.length > 0 && (
+                <span className="badge" style={{ marginLeft: 'auto', fontSize: '0.7rem', padding: '0.15rem 0.5rem', background: activeTab === 'properties' ? 'rgba(255,255,255,0.25)' : 'var(--bg-tertiary)', color: activeTab === 'properties' ? '#ffffff' : 'var(--text-muted)' }}>
+                  {properties.length}
+                </span>
+              )}
             </button>
 
             <button
+              type="button"
               onClick={() => setActiveTab('bookings')}
               className={`dashboard-nav-item ${activeTab === 'bookings' ? 'active' : ''}`}
-              style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer', textAlign: 'left' }}
             >
               <ClipboardList size={18} />
               <span>All Bookings</span>
             </button>
 
             <button
+              type="button"
               onClick={() => setActiveTab('transactions')}
               className={`dashboard-nav-item ${activeTab === 'transactions' ? 'active' : ''}`}
-              style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer', textAlign: 'left' }}
             >
               <Receipt size={18} />
               <span>Transactions</span>

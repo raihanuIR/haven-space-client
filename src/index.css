@@ -705,17 +705,40 @@ button, input, select, textarea {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.8rem 1rem;
+  padding: 0.85rem 1.1rem;
   border-radius: var(--radius-md);
   font-weight: 600;
-  color: var(--text-secondary);
-  transition: all var(--transition-fast);
+  font-size: 0.95rem;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: transparent;
+  border: 1px solid transparent;
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--transition-normal);
+  user-select: none;
 }
 
-.dashboard-nav-item:hover, .dashboard-nav-item.active {
-  background: var(--accent-gradient);
-  color: #ffffff;
+.dashboard-nav-item:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--accent-primary);
+  transform: translateX(3px);
 }
+
+.dashboard-nav-item.active {
+  background: var(--accent-gradient) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+  transform: translateX(3px);
+}
+
+.dashboard-nav-item.active svg,
+.dashboard-nav-item.active span {
+  color: #ffffff !important;
+}
+
 
 .dashboard-content {
   display: flex;

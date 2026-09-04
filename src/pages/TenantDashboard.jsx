@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Calendar, Heart, User, Trash2, Eye, ExternalLink, Clock, DollarSign } from 'lucide-react';
 import API from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -7,7 +7,12 @@ import LoadingSpinner from '../components/LoadingSpinner';
 
 const TenantDashboard = () => {
   const { user, updateUser } = useAuth();
-  const [activeTab, setActiveTab] = useState('bookings'); // 'bookings' | 'favorites' | 'profile'
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'bookings';
+
+  const setActiveTab = (tab) => {
+    setSearchParams({ tab });
+  };
 
   const [bookings, setBookings] = useState([]);
   const [favorites, setFavorites] = useState([]);
@@ -86,27 +91,27 @@ const TenantDashboard = () => {
           {/* Sidebar */}
           <aside className="dashboard-sidebar">
             <button
+              type="button"
               onClick={() => setActiveTab('bookings')}
               className={`dashboard-nav-item ${activeTab === 'bookings' ? 'active' : ''}`}
-              style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer', textAlign: 'left' }}
             >
               <Calendar size={18} />
               <span>My Bookings</span>
             </button>
 
             <button
+              type="button"
               onClick={() => setActiveTab('favorites')}
               className={`dashboard-nav-item ${activeTab === 'favorites' ? 'active' : ''}`}
-              style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer', textAlign: 'left' }}
             >
               <Heart size={18} />
               <span>My Favorites</span>
             </button>
 
             <button
+              type="button"
               onClick={() => setActiveTab('profile')}
               className={`dashboard-nav-item ${activeTab === 'profile' ? 'active' : ''}`}
-              style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer', textAlign: 'left' }}
             >
               <User size={18} />
               <span>My Profile</span>

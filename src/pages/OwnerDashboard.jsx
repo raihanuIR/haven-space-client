@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   BarChart3,
   PlusCircle,
@@ -37,7 +38,12 @@ import LoadingSpinner from '../components/LoadingSpinner';
 
 const OwnerDashboard = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('analytics'); // 'analytics' | 'add' | 'properties' | 'requests'
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'analytics';
+
+  const setActiveTab = (tab) => {
+    setSearchParams({ tab });
+  };
 
   // Data states
   const [analytics, setAnalytics] = useState(null);
@@ -229,36 +235,36 @@ const OwnerDashboard = () => {
           {/* Sidebar */}
           <aside className="dashboard-sidebar">
             <button
+              type="button"
               onClick={() => setActiveTab('analytics')}
               className={`dashboard-nav-item ${activeTab === 'analytics' ? 'active' : ''}`}
-              style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer', textAlign: 'left' }}
             >
               <BarChart3 size={18} />
               <span>Earnings Analytics</span>
             </button>
 
             <button
+              type="button"
               onClick={() => setActiveTab('properties')}
               className={`dashboard-nav-item ${activeTab === 'properties' ? 'active' : ''}`}
-              style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer', textAlign: 'left' }}
             >
               <Building size={18} />
               <span>My Properties</span>
             </button>
 
             <button
+              type="button"
               onClick={() => setActiveTab('add')}
               className={`dashboard-nav-item ${activeTab === 'add' ? 'active' : ''}`}
-              style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer', textAlign: 'left' }}
             >
               <PlusCircle size={18} />
               <span>Add Property</span>
             </button>
 
             <button
+              type="button"
               onClick={() => setActiveTab('requests')}
               className={`dashboard-nav-item ${activeTab === 'requests' ? 'active' : ''}`}
-              style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer', textAlign: 'left' }}
             >
               <ClipboardList size={18} />
               <span>Booking Requests</span>
