@@ -58,18 +58,19 @@ const BookingModal = ({ property, isOpen, onClose, onProceedToPayment }) => {
           {/* User Info (Read only) */}
           <div className="form-grid-2" style={{
             background: 'var(--bg-tertiary)',
+            border: '1px solid var(--border-color)',
             padding: '1rem',
             borderRadius: 'var(--radius-md)',
             marginBottom: '1.25rem',
             fontSize: '0.875rem',
           }}>
             <div>
-              <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.75rem' }}>Full Name</span>
-              <strong>{user?.name}</strong>
+              <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.75rem', marginBottom: '2px' }}>Full Name</span>
+              <strong style={{ color: 'var(--text-primary)' }}>{user?.name}</strong>
             </div>
             <div>
-              <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.75rem' }}>Email Address</span>
-              <strong>{user?.email}</strong>
+              <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.75rem', marginBottom: '2px' }}>Email Address</span>
+              <strong style={{ color: 'var(--text-primary)' }}>{user?.email}</strong>
             </div>
           </div>
 
@@ -130,7 +131,7 @@ const BookingModal = ({ property, isOpen, onClose, onProceedToPayment }) => {
             margin: '1rem 0',
           }}>
             <div>
-              <span style={{ fontWeight: 600 }}>Reservation Deposit</span>
+              <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Reservation Deposit</span>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>100% refundable upon owner rejection</p>
             </div>
             <div style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--accent-primary)' }}>
@@ -138,7 +139,7 @@ const BookingModal = ({ property, isOpen, onClose, onProceedToPayment }) => {
             </div>
           </div>
 
-          <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
+          <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.85rem' }}>
             Confirm & Proceed to Payment
           </button>
         </form>

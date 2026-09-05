@@ -1,6 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Calendar, Heart, User, Trash2, Eye, ExternalLink, Clock, DollarSign } from 'lucide-react';
+import {
+  Calendar,
+  Heart,
+  User,
+  Trash2,
+  Eye,
+  ExternalLink,
+  Clock,
+  DollarSign,
+  MapPin,
+  CheckCircle2,
+  Phone,
+  AlertCircle,
+} from 'lucide-react';
 import API from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -17,6 +30,11 @@ const TenantDashboard = () => {
   const [bookings, setBookings] = useState([]);
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [bookingFilter, setBookingFilter] = useState('all');
+
+  const filteredBookings = bookingFilter === 'all'
+    ? bookings
+    : bookings.filter((b) => b.bookingStatus === bookingFilter);
 
   // Profile Form
   const [profileName, setProfileName] = useState(user?.name || '');
@@ -75,15 +93,17 @@ const TenantDashboard = () => {
   };
 
   return (
-    <div className="page-wrapper" style={{ padding: '2.5rem 0 5rem 0' }}>
+    <div className="page-wrapper" style={{ padding: 'clamp(1.5rem, 3vw, 2.5rem) 0 4rem 0' }}>
       <div className="container">
         {/* Header */}
-        <div style={{ marginBottom: '2.5rem' }}>
+        <div style={{ marginBottom: '2rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.4rem' }}>
             <span className="badge badge-role">Tenant Dashboard</span>
           </div>
-          <h1 style={{ fontSize: '2.2rem' }}>Welcome back, {user?.name}</h1>
-          <p style={{ color: 'var(--text-muted)' }}>Manage your property reservations, bookmarked homes, and personal profile.</p>
+          <h1 style={{ fontSize: 'clamp(1.6rem, 5vw, 2.2rem)' }}>Welcome back, {user?.name}</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
+            Manage your property reservations, bookmarked homes, and personal profile.
+          </p>
         </div>
 
         {/* Dashboard Layout with Sidebar Navigation */}
@@ -142,55 +162,280 @@ const TenantDashboard = () => {
                     <Link to="/properties" className="btn btn-primary">Browse Properties</Link>
                   </div>
                 ) : (
-                  <div className="table-container">
-                    <table className="custom-table">
-                      <thead>
-                        <tr>
-                          <th>Property Name</th>
-                          <th>Booking Date</th>
-                          <th>Move-in Date</th>
-                          <th>Amount Paid</th>
-                          <th>Booking Status</th>
-                          <th>Payment Status</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {bookings.map((booking) => (
-                          <tr key={booking._id}>
-                            <td>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                <img
-                                  src={booking.propertyImage}
-                                  alt={booking.propertyName}
-                                  style={{ width: '44px', height: '44px', borderRadius: 'var(--radius-sm)', objectFit: 'cover' }}
-                                />
-                                <div>
-                                  <strong style={{ display: 'block' }}>{booking.propertyName}</strong>
-                                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{booking.propertyLocation}</span>
+                  <>
+                    {/* Booking Stats Summary Strip */}
+                    <div className="dashboard-stats-strip">
+                      <div className="stat-pill">
+                        <div className="stat-pill-icon stat-icon-total">
+                          <Calendar size={18} />
+                        </div>
+                        <div>
+                          <span className="stat-pill-value">{bookings.length}</span>
+                          <span className="stat-pill-label">Total Bookings</span>
+                        </div>
+                      </div>
+                      <div className="stat-pill">
+                        <div className="stat-pill-icon stat-icon-approved">
+                          <CheckCircle2 size={18} />
+                        </div>
+                        <div>
+                          <span className="stat-pill-value">
+                            {bookings.filter((b) => b.bookingStatus === 'Approved').length}
+                          </span>
+                          <span className="stat-pill-label">Approved</span>
+                        </div>
+                      </div>
+                      <div className="stat-pill">
+                        <div className="stat-pill-icon stat-icon-pending">
+                          <Clock size={18} />
+                        </div>
+                        <div>
+                          <span className="stat-pill-value">
+                            {bookings.filter((b) => b.bookingStatus === 'Pending').length}
+                          </span>
+                          <span className="stat-pill-label">Pending</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Filter Pills */}
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      marginBottom: '1.25rem',
+                      overflowX: 'auto',
+                      paddingBottom: '0.25rem',
+                    }}>
+                      <button
+                        type="button"
+                        onClick={() => setBookingFilter('all')}
+                        className={`btn btn-sm ${bookingFilter === 'all' ? 'btn-primary' : 'btn-secondary'}`}
+                        style={{ borderRadius: 'var(--radius-full)', whiteSpace: 'nowrap', padding: '0.4rem 0.9rem' }}
+                      >
+                        All ({bookings.length})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setBookingFilter('Approved')}
+                        className={`btn btn-sm ${bookingFilter === 'Approved' ? 'btn-primary' : 'btn-secondary'}`}
+                        style={{ borderRadius: 'var(--radius-full)', whiteSpace: 'nowrap', padding: '0.4rem 0.9rem' }}
+                      >
+                        Approved ({bookings.filter((b) => b.bookingStatus === 'Approved').length})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setBookingFilter('Pending')}
+                        className={`btn btn-sm ${bookingFilter === 'Pending' ? 'btn-primary' : 'btn-secondary'}`}
+                        style={{ borderRadius: 'var(--radius-full)', whiteSpace: 'nowrap', padding: '0.4rem 0.9rem' }}
+                      >
+                        Pending ({bookings.filter((b) => b.bookingStatus === 'Pending').length})
+                      </button>
+                    </div>
+
+                    {/* Desktop Table View */}
+                    <div className="table-container desktop-only-table">
+                      <table className="custom-table" style={{ minWidth: '780px' }}>
+                        <thead>
+                          <tr>
+                            <th style={{ minWidth: '260px', width: '36%' }}>Property Name</th>
+                            <th style={{ minWidth: '120px' }}>Booking Date</th>
+                            <th style={{ minWidth: '120px' }}>Move-in Date</th>
+                            <th style={{ minWidth: '110px' }}>Amount Paid</th>
+                            <th style={{ minWidth: '130px' }}>Booking Status</th>
+                            <th style={{ minWidth: '120px' }}>Payment Status</th>
+                            <th style={{ minWidth: '80px', textAlign: 'center' }}>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredBookings.map((booking) => {
+                            const propId = typeof booking.propertyId === 'object' ? booking.propertyId?._id : booking.propertyId;
+                            return (
+                              <tr key={booking._id}>
+                                <td>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                                    <img
+                                      src={booking.propertyImage}
+                                      alt={booking.propertyName}
+                                      style={{ width: '52px', height: '52px', borderRadius: 'var(--radius-md)', objectFit: 'cover', flexShrink: 0 }}
+                                    />
+                                    <div style={{ minWidth: 0, flex: 1 }}>
+                                      {propId ? (
+                                        <Link to={`/properties/${propId}`} style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)', display: 'block', lineHeight: '1.35' }}>
+                                          {booking.propertyName}
+                                        </Link>
+                                      ) : (
+                                        <strong style={{ display: 'block', fontSize: '0.95rem', lineHeight: '1.35' }}>{booking.propertyName}</strong>
+                                      )}
+                                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                                        <MapPin size={13} />
+                                        {booking.propertyLocation}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td style={{ whiteSpace: 'nowrap' }}>{new Date(booking.createdAt).toLocaleDateString()}</td>
+                                <td style={{ whiteSpace: 'nowrap' }}>{new Date(booking.moveInDate).toLocaleDateString()}</td>
+                                <td style={{ whiteSpace: 'nowrap' }}><strong style={{ color: 'var(--accent-primary)', fontSize: '1rem' }}>${booking.amountPaid?.toLocaleString()}</strong></td>
+                                <td>
+                                  <span className={`badge ${
+                                    booking.bookingStatus === 'Approved' ? 'badge-approved' :
+                                    booking.bookingStatus === 'Pending' ? 'badge-pending' : 'badge-rejected'
+                                  }`}>
+                                    {booking.bookingStatus}
+                                  </span>
+                                </td>
+                                <td>
+                                  <span className="badge badge-paid">
+                                    {booking.paymentStatus}
+                                  </span>
+                                </td>
+                                <td style={{ textAlign: 'center' }}>
+                                  {propId && (
+                                    <Link
+                                      to={`/properties/${propId}`}
+                                      className="btn btn-secondary btn-sm"
+                                      title="View Property Details"
+                                      style={{ padding: '0.4rem 0.6rem' }}
+                                    >
+                                      <Eye size={15} />
+                                    </Link>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Mobile Cards View */}
+                    <div className="mobile-only-cards">
+                      {filteredBookings.map((booking) => {
+                        const propId = typeof booking.propertyId === 'object' ? booking.propertyId?._id : booking.propertyId;
+                        return (
+                          <div key={booking._id} className="mobile-booking-card">
+                            {/* Property Cover Hero Banner */}
+                            <div className="mobile-booking-hero">
+                              <img
+                                src={booking.propertyImage}
+                                alt={booking.propertyName}
+                                loading="lazy"
+                              />
+                              <div className="mobile-hero-badge-left">
+                                <span className="badge badge-paid">
+                                  {booking.paymentStatus}
+                                </span>
+                              </div>
+                              <div className="mobile-hero-badge-right">
+                                <span className={`badge ${
+                                  booking.bookingStatus === 'Approved' ? 'badge-approved' :
+                                  booking.bookingStatus === 'Pending' ? 'badge-pending' : 'badge-rejected'
+                                }`}>
+                                  {booking.bookingStatus}
+                                </span>
+                              </div>
+                              <div className="mobile-hero-price-chip">
+                                ${booking.amountPaid?.toLocaleString()} Paid
+                              </div>
+                            </div>
+
+                            {/* Card Body */}
+                            <div className="mobile-booking-body">
+                              <div>
+                                {propId ? (
+                                  <Link to={`/properties/${propId}`} className="mobile-booking-title">
+                                    {booking.propertyName}
+                                  </Link>
+                                ) : (
+                                  <span className="mobile-booking-title">{booking.propertyName}</span>
+                                )}
+                                {booking.propertyLocation && (
+                                  <div className="mobile-booking-location" style={{ marginTop: '0.3rem' }}>
+                                    <MapPin size={14} />
+                                    <span>{booking.propertyLocation}</span>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Dates & Financial Info Grid */}
+                              <div className="mobile-booking-info-box">
+                                <div className="mobile-booking-info-item">
+                                  <span className="info-item-label">
+                                    <Calendar size={12} /> Move-in Date
+                                  </span>
+                                  <span className="info-item-value">
+                                    {new Date(booking.moveInDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                                  </span>
+                                </div>
+                                <div className="mobile-booking-info-item">
+                                  <span className="info-item-label">
+                                    <Clock size={12} /> Booked On
+                                  </span>
+                                  <span className="info-item-value">
+                                    {new Date(booking.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                                  </span>
+                                </div>
+                                {booking.contactNumber && (
+                                  <div className="mobile-booking-info-item">
+                                    <span className="info-item-label">
+                                      <Phone size={12} /> Contact Tel
+                                    </span>
+                                    <span className="info-item-value" style={{ fontSize: '0.85rem' }}>
+                                      {booking.contactNumber}
+                                    </span>
+                                  </div>
+                                )}
+                                <div className="mobile-booking-info-item">
+                                  <span className="info-item-label">
+                                    <DollarSign size={12} /> Total Rent
+                                  </span>
+                                  <span className="info-item-value" style={{ color: 'var(--accent-primary)' }}>
+                                    ${booking.amountPaid?.toLocaleString()}
+                                  </span>
                                 </div>
                               </div>
-                            </td>
-                            <td>{new Date(booking.createdAt).toLocaleDateString()}</td>
-                            <td>{new Date(booking.moveInDate).toLocaleDateString()}</td>
-                            <td><strong>${booking.amountPaid?.toLocaleString()}</strong></td>
-                            <td>
-                              <span className={`badge ${
-                                booking.bookingStatus === 'Approved' ? 'badge-approved' :
-                                booking.bookingStatus === 'Pending' ? 'badge-pending' : 'badge-rejected'
-                              }`}>
-                                {booking.bookingStatus}
-                              </span>
-                            </td>
-                            <td>
-                              <span className="badge badge-paid">
-                                {booking.paymentStatus}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+
+                              {/* Status Alert Banner */}
+                              {booking.bookingStatus === 'Approved' ? (
+                                <div className="mobile-status-banner mobile-status-approved">
+                                  <CheckCircle2 size={16} />
+                                  <span>Reservation Confirmed by Property Owner</span>
+                                </div>
+                              ) : booking.bookingStatus === 'Pending' ? (
+                                <div className="mobile-status-banner mobile-status-pending">
+                                  <Clock size={16} />
+                                  <span>Awaiting Owner Confirmation Review</span>
+                                </div>
+                              ) : (
+                                <div className="mobile-status-banner mobile-status-rejected">
+                                  <AlertCircle size={16} />
+                                  <span>Reservation Declined by Owner</span>
+                                </div>
+                              )}
+
+                              {booking.additionalNotes && (
+                                <div className="mobile-booking-notes">
+                                  <strong>Special Note:</strong> {booking.additionalNotes}
+                                </div>
+                              )}
+
+                              {propId && (
+                                <Link
+                                  to={`/properties/${propId}`}
+                                  className="btn btn-secondary btn-sm"
+                                  style={{ width: '100%', padding: '0.75rem', marginTop: '0.25rem', gap: '0.5rem' }}
+                                >
+                                  <Eye size={16} />
+                                  <span>View Property Listing</span>
+                                </Link>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
                 )}
               </div>
             )}
@@ -217,69 +462,114 @@ const TenantDashboard = () => {
                     <Link to="/properties" className="btn btn-primary">Discover Properties</Link>
                   </div>
                 ) : (
-                  <div className="table-container">
-                    <table className="custom-table">
-                      <thead>
-                        <tr>
-                          <th>Property</th>
-                          <th>Type</th>
-                          <th>Rent Price</th>
-                          <th>Location</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {favorites.map((fav) => {
-                          const prop = fav.propertyId;
-                          if (!prop) return null;
-                          return (
-                            <tr key={fav._id}>
-                              <td>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                  <img
-                                    src={prop.images?.[0] || 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=100&q=80'}
-                                    alt={prop.title}
-                                    style={{ width: '48px', height: '48px', borderRadius: 'var(--radius-sm)', objectFit: 'cover' }}
-                                  />
-                                  <strong>{prop.title}</strong>
+                  <>
+                    {/* Desktop Table View */}
+                    <div className="table-container desktop-only-table">
+                      <table className="custom-table" style={{ minWidth: '760px' }}>
+                        <thead>
+                          <tr>
+                            <th style={{ minWidth: '260px', width: '36%' }}>Property</th>
+                            <th style={{ minWidth: '120px' }}>Type</th>
+                            <th style={{ minWidth: '130px' }}>Rent Price</th>
+                            <th style={{ minWidth: '160px' }}>Location</th>
+                            <th style={{ minWidth: '100px', textAlign: 'center' }}>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {favorites.map((fav) => {
+                            const prop = fav.propertyId;
+                            if (!prop) return null;
+                            return (
+                              <tr key={fav._id}>
+                                <td>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                                    <img
+                                      src={prop.images?.[0] || 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=100&q=80'}
+                                      alt={prop.title}
+                                      style={{ width: '52px', height: '52px', borderRadius: 'var(--radius-md)', objectFit: 'cover', flexShrink: 0 }}
+                                    />
+                                    <strong style={{ fontSize: '0.95rem', lineHeight: '1.35' }}>{prop.title}</strong>
+                                  </div>
+                                </td>
+                                <td><span className="badge badge-approved">{prop.propertyType}</span></td>
+                                <td style={{ whiteSpace: 'nowrap' }}><strong>${prop.rentPrice?.toLocaleString()}</strong>/{prop.rentType?.toLowerCase()}</td>
+                                <td>
+                                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.82rem' }}>
+                                    <MapPin size={13} color="var(--text-muted)" />
+                                    {prop.location}
+                                  </span>
+                                </td>
+                                <td style={{ textAlign: 'center' }}>
+                                  <div style={{ display: 'inline-flex', gap: '0.5rem' }}>
+                                    <Link to={`/properties/${prop._id}`} className="btn btn-secondary btn-sm" title="View Property Details">
+                                      <Eye size={15} />
+                                    </Link>
+                                    <button
+                                      onClick={() => handleRemoveFavorite(fav._id)}
+                                      className="btn btn-danger btn-sm"
+                                      title="Remove Favorite"
+                                    >
+                                      <Trash2 size={15} />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Mobile Cards View */}
+                    <div className="mobile-only-cards">
+                      {favorites.map((fav) => {
+                        const prop = fav.propertyId;
+                        if (!prop) return null;
+                        return (
+                          <div key={fav._id} className="mobile-favorite-card">
+                            <div className="mobile-fav-header">
+                              <img
+                                src={prop.images?.[0] || 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=200&q=80'}
+                                alt={prop.title}
+                                className="mobile-fav-img"
+                              />
+                              <div className="mobile-fav-info">
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                                  <span className="badge badge-approved">{prop.propertyType}</span>
+                                  <span className="cell-price">${prop.rentPrice?.toLocaleString()}/{prop.rentType?.toLowerCase()}</span>
                                 </div>
-                              </td>
-                              <td><span className="badge badge-approved">{prop.propertyType}</span></td>
-                              <td><strong>${prop.rentPrice?.toLocaleString()}</strong>/{prop.rentType?.toLowerCase()}</td>
-                              <td>{prop.location}</td>
-                              <td>
-                                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                  <Link to={`/properties/${prop._id}`} className="btn btn-secondary btn-sm" title="View Property Details">
-                                    <Eye size={15} />
-                                  </Link>
-                                  <button
-                                    onClick={() => handleRemoveFavorite(fav._id)}
-                                    className="btn btn-danger btn-sm"
-                                    title="Remove Favorite"
-                                  >
-                                    <Trash2 size={15} />
-                                  </button>
-                                </div>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
+                                <h4 style={{ fontSize: '0.95rem', fontWeight: '700', marginBottom: '0.25rem', lineHeight: '1.3' }}>
+                                  {prop.title}
+                                </h4>
+                                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                  <MapPin size={13} /> {prop.location}
+                                </span>
+                              </div>
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                              <Link to={`/properties/${prop._id}`} className="btn btn-secondary btn-sm" style={{ flex: 1 }}>
+                                <Eye size={15} /> View
+                              </Link>
+                              <button
+                                onClick={() => handleRemoveFavorite(fav._id)}
+                                className="btn btn-danger btn-sm"
+                                style={{ flex: 1 }}
+                              >
+                                <Trash2 size={15} /> Remove
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
                 )}
               </div>
             )}
 
             {/* 3. Profile Tab */}
             {activeTab === 'profile' && (
-              <div style={{
-                background: 'var(--bg-card)',
-                border: '1px solid var(--border-color)',
-                borderRadius: 'var(--radius-lg)',
-                padding: '2.5rem',
-                maxWidth: '650px',
-              }}>
+              <div className="dashboard-profile-card">
                 <h2 style={{ fontSize: '1.4rem', marginBottom: '1.5rem' }}>My Profile Details</h2>
 
                 {profileSuccess && (
@@ -288,7 +578,7 @@ const TenantDashboard = () => {
                   </div>
                 )}
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
                   <img
                     src={profilePhoto || user?.photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80'}
                     alt={user?.name}
@@ -341,7 +631,7 @@ const TenantDashboard = () => {
                     type="submit"
                     disabled={profileSaving}
                     className="btn btn-primary"
-                    style={{ marginTop: '1rem' }}
+                    style={{ marginTop: '1rem', width: '100%' }}
                   >
                     {profileSaving ? 'Saving...' : 'Update Profile'}
                   </button>

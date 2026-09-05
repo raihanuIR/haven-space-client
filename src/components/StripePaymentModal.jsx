@@ -5,12 +5,16 @@ import confetti from 'canvas-confetti';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import API from '../services/api';
+import { useTheme } from '../context/ThemeContext';
 
 const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY || '';
 const isRealStripeKey = stripePublishableKey.startsWith('pk_test_') || stripePublishableKey.startsWith('pk_live_');
 const stripePromise = isRealStripeKey ? loadStripe(stripePublishableKey) : null;
 
 const CheckoutForm = ({ bookingData, onClose }) => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -101,9 +105,9 @@ const CheckoutForm = ({ bookingData, onClose }) => {
     return (
       <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
         <CheckCircle2 size={64} color="var(--success)" style={{ margin: '0 auto 1rem auto' }} />
-        <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Payment Confirmed!</h3>
+        <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>Payment Confirmed!</h3>
         <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-          Your reservation for <strong>{bookingData.propertyName}</strong> has been submitted. Status is currently <strong>Pending</strong> owner review.
+          Your reservation for <strong style={{ color: 'var(--text-primary)' }}>{bookingData.propertyName}</strong> has been submitted. Status is currently <strong>Pending</strong> owner review.
         </p>
         <span className="badge badge-approved">Redirecting to My Bookings...</span>
       </div>
@@ -131,32 +135,47 @@ const CheckoutForm = ({ bookingData, onClose }) => {
 
       {/* Credit Card Details Header */}
       <div style={{
-        background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)',
+        background: isDark
+          ? 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)'
+          : 'linear-gradient(135deg, #4338ca 0%, #3730a3 100%)',
         color: '#ffffff',
         padding: '1.25rem',
         borderRadius: 'var(--radius-md)',
         marginBottom: '1.5rem',
         boxShadow: 'var(--shadow-md)',
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-          <span style={{ fontSize: '0.85rem', opacity: 0.85, fontWeight: 600 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+          <span style={{ fontSize: '0.85rem', color: '#e0e7ff', fontWeight: 600 }}>
             {isRealStripeKey ? 'Stripe Official Test Gateway' : 'Stripe Card Simulator'}
           </span>
-          <CreditCard size={22} />
+          <CreditCard size={22} color="#c7d2fe" />
         </div>
-        <div style={{ fontSize: '0.9rem', opacity: 0.9, marginBottom: '0.5rem' }}>
-          Test Card: <code style={{ background: 'rgba(255,255,255,0.15)', padding: '2px 6px', borderRadius: '4px' }}>4242 4242 4242 4242</code>
+        <div style={{ fontSize: '0.95rem', color: '#ffffff', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <span>Test Card:</span>
+          <code style={{
+            background: 'rgba(255, 255, 255, 0.22)',
+            color: '#ffffff',
+            padding: '3px 8px',
+            borderRadius: '4px',
+            fontWeight: 700,
+            fontFamily: 'monospace',
+            letterSpacing: '0.04em',
+          }}>
+            4242 4242 4242 4242
+          </code>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', opacity: 0.75 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#c7d2fe' }}>
           <span>Exp: Any future date (e.g. 12/28)</span>
-          <span>CVC: Any 3 digits</span>
+          <span>CVC: 123</span>
         </div>
       </div>
 
       {/* Real Stripe Card Element or Simulator Input */}
       {isRealStripeKey ? (
         <div className="form-group" style={{ marginBottom: '1.25rem' }}>
-          <label className="form-label" style={{ marginBottom: '0.5rem' }}>Card Information</label>
+          <label className="form-label" style={{ marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>
+            Card Information
+          </label>
           <div style={{
             padding: '0.85rem 1rem',
             borderRadius: 'var(--radius-md)',
@@ -167,11 +186,12 @@ const CheckoutForm = ({ bookingData, onClose }) => {
               options={{
                 style: {
                   base: {
-                    fontSize: '15px',
-                    color: '#f9fafb',
-                    fontFamily: "'Plus Jakarta Sans', sans-serif",
+                    fontSize: '16px',
+                    color: isDark ? '#f9fafb' : '#0f172a',
+                    fontFamily: "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                    iconColor: isDark ? '#818cf8' : '#4f46e5',
                     '::placeholder': {
-                      color: '#9ca3af',
+                      color: isDark ? '#9ca3af' : '#64748b',
                     },
                   },
                   invalid: {
@@ -186,22 +206,50 @@ const CheckoutForm = ({ bookingData, onClose }) => {
       ) : (
         <>
           <div className="form-group">
-            <label className="form-label">Card Number</label>
+            <label className="form-label" style={{ color: 'var(--text-secondary)' }}>Card Number</label>
             <input
               type="text"
               className="form-input"
               value="4242 4242 4242 4242 (Stripe Test Card)"
-              disabled
+              readOnly
+              style={{
+                color: 'var(--text-primary)',
+                background: 'var(--bg-tertiary)',
+                fontWeight: 600,
+                cursor: 'default',
+              }}
             />
           </div>
           <div className="form-grid-2">
             <div className="form-group">
-              <label className="form-label">Expiration Date</label>
-              <input type="text" className="form-input" value="12/28" disabled />
+              <label className="form-label" style={{ color: 'var(--text-secondary)' }}>Expiration Date</label>
+              <input
+                type="text"
+                className="form-input"
+                value="12/28"
+                readOnly
+                style={{
+                  color: 'var(--text-primary)',
+                  background: 'var(--bg-tertiary)',
+                  fontWeight: 600,
+                  cursor: 'default',
+                }}
+              />
             </div>
             <div className="form-group">
-              <label className="form-label">CVC / CVV</label>
-              <input type="text" className="form-input" value="123" disabled />
+              <label className="form-label" style={{ color: 'var(--text-secondary)' }}>CVC / CVV</label>
+              <input
+                type="text"
+                className="form-input"
+                value="123"
+                readOnly
+                style={{
+                  color: 'var(--text-primary)',
+                  background: 'var(--bg-tertiary)',
+                  fontWeight: 600,
+                  cursor: 'default',
+                }}
+              />
             </div>
           </div>
         </>
@@ -209,15 +257,16 @@ const CheckoutForm = ({ bookingData, onClose }) => {
 
       <div style={{
         background: 'var(--bg-tertiary)',
-        padding: '1rem',
+        border: '1px solid var(--border-color)',
+        padding: '1rem 1.25rem',
         borderRadius: 'var(--radius-md)',
         margin: '1.25rem 0',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
       }}>
-        <span style={{ fontWeight: 600 }}>Total Amount to Charge:</span>
-        <span style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--accent-primary)' }}>
+        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Total Amount to Charge:</span>
+        <span style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--accent-primary)' }}>
           ${bookingData.amount.toLocaleString()} USD
         </span>
       </div>
@@ -226,7 +275,7 @@ const CheckoutForm = ({ bookingData, onClose }) => {
         type="submit"
         disabled={loading}
         className="btn btn-primary"
-        style={{ width: '100%', gap: '0.5rem' }}
+        style={{ width: '100%', gap: '0.5rem', padding: '0.85rem' }}
       >
         {loading ? (
           <span>Processing Stripe Payment...</span>
