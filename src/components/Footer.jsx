@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Building2, Mail, Phone, MapPin, Instagram, Linkedin, Github } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 // Custom SVG for new X (formerly Twitter) logo
 const XIcon = ({ size = 20 }) => (
@@ -10,6 +11,14 @@ const XIcon = ({ size = 20 }) => (
 );
 
 const Footer = () => {
+  const { user, isAuthenticated } = useAuth();
+
+  const getDashboardPath = () => {
+    if (user?.role === 'Admin') return '/dashboard/admin';
+    if (user?.role === 'Owner') return '/dashboard/owner';
+    return '/dashboard/tenant';
+  };
+
   return (
     <footer className="footer">
       <div className="container">
@@ -57,11 +66,38 @@ const Footer = () => {
           <div>
             <h4 style={{ marginBottom: '1.25rem', fontSize: '1.1rem' }}>Portals</h4>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.925rem', color: 'var(--text-muted)' }}>
-              <li><Link to="/dashboard/tenant">Tenant Dashboard</Link></li>
-              <li><Link to="/dashboard/owner">Owner Dashboard</Link></li>
-              <li><Link to="/dashboard/admin">Admin Portal</Link></li>
-              <li><Link to="/login">Account Sign In</Link></li>
-              <li><Link to="/register">Register Listing</Link></li>
+              {isAuthenticated ? (
+                <>
+                  <li><Link to={getDashboardPath()}>{user?.role} Dashboard</Link></li>
+                  {user?.role === 'Tenant' && (
+                    <>
+                      <li><Link to="/dashboard/tenant?tab=bookings">My Bookings</Link></li>
+                      <li><Link to="/dashboard/tenant?tab=favorites">Saved Favorites</Link></li>
+                    </>
+                  )}
+                  {user?.role === 'Owner' && (
+                    <>
+                      <li><Link to="/dashboard/owner?tab=add">Add New Listing</Link></li>
+                      <li><Link to="/dashboard/owner?tab=requests">Booking Requests</Link></li>
+                    </>
+                  )}
+                  {user?.role === 'Admin' && (
+                    <>
+                      <li><Link to="/dashboard/admin?tab=properties">Moderate Properties</Link></li>
+                      <li><Link to="/dashboard/admin?tab=transactions">Audit Transactions</Link></li>
+                    </>
+                  )}
+                  <li><Link to="/dashboard/profile">My Account Profile</Link></li>
+                </>
+              ) : (
+                <>
+                  <li><Link to="/login">Account Sign In</Link></li>
+                  <li><Link to="/register">Register Listing / Account</Link></li>
+                  <li><Link to="/dashboard/tenant">Tenant Dashboard</Link></li>
+                  <li><Link to="/dashboard/owner">Owner Dashboard</Link></li>
+                  <li><Link to="/dashboard/admin">Admin Portal</Link></li>
+                </>
+              )}
             </ul>
           </div>
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { UserPlus, Mail, Lock, User, Image, Building2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -14,8 +14,15 @@ const Register = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { register, googleLogin } = useAuth();
+  const { user, isAuthenticated, register, googleLogin } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      const target = user?.role === 'Admin' ? '/dashboard/admin' : user?.role === 'Owner' ? '/dashboard/owner' : '/dashboard/tenant';
+      navigate(target, { replace: true });
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

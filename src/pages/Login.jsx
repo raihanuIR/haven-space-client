@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { LogIn, Mail, Lock, AlertCircle, Building2, UserCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -9,10 +9,17 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { login, googleLogin } = useAuth();
+  const { user, isAuthenticated, login, googleLogin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || '/';
+  const defaultDashboard = user?.role === 'Admin' ? '/dashboard/admin' : user?.role === 'Owner' ? '/dashboard/owner' : '/dashboard/tenant';
+  const from = location.state?.from?.pathname || defaultDashboard;
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, navigate, from]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
