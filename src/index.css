@@ -327,6 +327,12 @@ button, input, select, textarea {
   gap: 1rem;
 }
 
+.nav-auth-desktop {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
 .theme-toggle-btn {
   background: transparent;
   border: 1px solid var(--border-color);
@@ -1056,6 +1062,9 @@ button, input, select, textarea {
 
 @media (max-width: 768px) {
   .nav-links {
+    display: none;
+  }
+  .nav-auth-desktop {
     display: none;
   }
   .mobile-toggle {

@@ -92,7 +92,7 @@ const Navbar = () => {
               </button>
             </div>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            <div className="nav-auth-desktop">
               <Link to="/login" className="btn btn-secondary btn-sm">
                 <LogIn size={16} />
                 <span>Login</span>
@@ -137,8 +137,14 @@ const Navbar = () => {
             </>
           ) : (
             <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-              <Link to="/login" onClick={() => setMobileOpen(false)} className="btn btn-secondary btn-sm">Login</Link>
-              <Link to="/register" onClick={() => setMobileOpen(false)} className="btn btn-primary btn-sm">Register</Link>
+              <Link to="/login" onClick={() => setMobileOpen(false)} className="btn btn-secondary btn-sm">
+                <LogIn size={16} />
+                <span>Login</span>
+              </Link>
+              <Link to="/register" onClick={() => setMobileOpen(false)} className="btn btn-primary btn-sm">
+                <UserPlus size={16} />
+                <span>Register</span>
+              </Link>
             </div>
           )}
         </div>
