@@ -6,8 +6,10 @@ A modern, high-converting digital rental marketplace connecting tenants and veri
 Enables tenants to browse verified properties, execute digital reservations with Stripe payments, submit ratings & reviews, and track leases. Provides property owners with automated booking management, performance analytics charts, and listing publishing tools. Delivers administrators full moderation powers over users, properties, and payment transactions.
 
 ## Live Deployment
-- **Live URL**: https://b13-10.vercel.app (or custom deployed Vercel link)
-- **API Server Endpoint**: https://api.rentalhub.com
+- **Front-End Live URL**: [https://haven-space-client.vercel.app/](https://haven-space-client.vercel.app/)
+- **Live API Endpoint**: [https://haven-space-server-theta.vercel.app/api](https://haven-space-server-theta.vercel.app/api)
+- **Client Repository**: [https://github.com/raihanuIR/haven-space-client](https://github.com/raihanuIR/haven-space-client)
+- **Server Repository**: [https://github.com/raihanuIR/haven-space-server](https://github.com/raihanuIR/haven-space-server)
 
 ## Key Features
 - **Role-Based Authentication (RBAC)**: Supports Tenant, Owner, and Admin roles with secure JWT validation and Google social login (defaulting role to Tenant).
