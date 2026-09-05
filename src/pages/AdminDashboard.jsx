@@ -59,13 +59,13 @@ const AdminDashboard = () => {
         const { data } = await API.get('/admin/properties');
         if (data.success) setProperties(data.properties);
       } else if (activeTab === 'bookings') {
-        const { data } = await API.get(`/admin/bookings?page=${bookingPage}&limit=8`);
+        const { data } = await API.get(`/admin/bookings?page=${bookingPage}&limit=4`);
         if (data.success) {
           setBookings(data.bookings);
           setTotalBookingPages(data.totalPages || 1);
         }
       } else if (activeTab === 'transactions') {
-        const { data } = await API.get(`/admin/transactions?page=${transactionPage}&limit=8`);
+        const { data } = await API.get(`/admin/transactions?page=${transactionPage}&limit=4`);
         if (data.success) {
           setTransactions(data.transactions);
           setTotalTransactionPages(data.totalPages || 1);
