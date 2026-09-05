@@ -49,32 +49,98 @@ const PropertyDetails = () => {
   const [submittingReview, setSubmittingReview] = useState(false);
   const [reviewMessage, setReviewMessage] = useState('');
 
-  useEffect(() => {
-    const fetchPropertyData = async () => {
-      try {
-        const [propRes, reviewRes, favRes] = await Promise.all([
-          API.get(`/properties/${id}`),
-          API.get(`/reviews/property/${id}`),
-          isAuthenticated ? API.get('/favorites') : Promise.resolve({ data: { favorites: [] } }),
-        ]);
+  const [errorMessage, setErrorMessage] = useState(null);
 
-        if (propRes.data.success) {
-          setProperty(propRes.data.property);
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [id]);
+
+  const fetchPropertyData = async (isSilentRetry = false) => {
+    if (!isSilentRetry) {
+      setLoading(true);
+    }
+    setErrorMessage(null);
+
+    const rawId = id ? String(id).trim() : '';
+    if (!rawId) {
+      setProperty(null);
+      setErrorMessage('Invalid property identifier.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Step 1: Fetch primary property with auto-retry resilience
+      let propertyItem = null;
+      try {
+        const propRes = await API.get(`/properties/${rawId}`);
+        if (propRes.data?.success && propRes.data.property) {
+          propertyItem = propRes.data.property;
         }
-        if (reviewRes.data.success) {
+      } catch (firstErr) {
+        // If 404, it truly doesn't exist
+        if (firstErr.response?.status === 404) {
+          setProperty(null);
+          setErrorMessage('Property not found. The listing may have been unlisted or removed.');
+          setLoading(false);
+          return;
+        }
+
+        // On network error or 500 (backend waking up / connecting to Atlas), auto-retry once after 800ms
+        console.warn('[PropertyDetails] First attempt failed, retrying in 800ms...', firstErr.message);
+        await new Promise((resolve) => setTimeout(resolve, 800));
+        const retryRes = await API.get(`/properties/${rawId}`);
+        if (retryRes.data?.success && retryRes.data.property) {
+          propertyItem = retryRes.data.property;
+        }
+      }
+
+      if (!propertyItem) {
+        setProperty(null);
+        setErrorMessage('Unable to load property details. The server may still be connecting.');
+        setLoading(false);
+        return;
+      }
+
+      setProperty(propertyItem);
+      setLoading(false);
+
+      // Step 2: Fetch secondary reviews & favorites non-blocking so they NEVER crash the property view
+      try {
+        const reviewRes = await API.get(`/reviews/property/${rawId}`);
+        if (reviewRes.data?.success && Array.isArray(reviewRes.data.reviews)) {
           setReviews(reviewRes.data.reviews);
         }
-        if (favRes.data?.success) {
-          const hasFav = favRes.data.favorites.some((f) => f.propertyId?._id === id || f.propertyId === id);
-          setIsFavorite(hasFav);
-        }
-      } catch (err) {
-        console.error('Fetch property details error:', err);
-      } finally {
-        setLoading(false);
+      } catch (revErr) {
+        console.warn('[PropertyDetails] Non-blocking review fetch warning:', revErr.message);
       }
-    };
 
+      if (isAuthenticated) {
+        try {
+          const favRes = await API.get('/favorites');
+          if (favRes.data?.success && Array.isArray(favRes.data.favorites)) {
+            const hasFav = favRes.data.favorites.some(
+              (f) => f.propertyId?._id === rawId || f.propertyId === rawId
+            );
+            setIsFavorite(hasFav);
+          }
+        } catch (favErr) {
+          console.warn('[PropertyDetails] Non-blocking favorite fetch warning:', favErr.message);
+        }
+      }
+    } catch (err) {
+      console.error('[PropertyDetails] Error fetching property:', err);
+      setProperty(null);
+      setErrorMessage(
+        err.response?.status === 404
+          ? 'Property not found. The listing may have been unlisted or removed.'
+          : 'Unable to connect to the rental service. Please check your internet connection or try again.'
+      );
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchPropertyData();
   }, [id, isAuthenticated]);
 
@@ -137,14 +203,28 @@ const PropertyDetails = () => {
 
   if (!property) {
     return (
-      <div className="container" style={{ padding: '5rem 0', textAlign: 'center' }}>
-        <h2>Property Not Found</h2>
-        <p style={{ color: 'var(--text-muted)', margin: '1rem 0 2rem 0' }}>
-          The requested listing is unavailable or has been removed.
-        </p>
-        <button onClick={() => navigate('/properties')} className="btn btn-primary">
-          Back to Listings
-        </button>
+      <div className="container" style={{ padding: '5rem 1rem', textAlign: 'center', maxWidth: '560px', margin: '0 auto' }}>
+        <div style={{
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border-color)',
+          borderRadius: 'var(--radius-lg)',
+          padding: '3rem 2rem',
+          boxShadow: 'var(--shadow-md)',
+        }}>
+          <AlertCircle size={48} color="var(--accent-primary)" style={{ margin: '0 auto 1.25rem auto' }} />
+          <h2 style={{ fontSize: '1.5rem', marginBottom: '0.75rem' }}>Listing Unavailable</h2>
+          <p style={{ color: 'var(--text-muted)', marginBottom: '2rem', lineHeight: '1.6' }}>
+            {errorMessage || 'The requested property could not be loaded at this moment.'}
+          </p>
+          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button onClick={() => fetchPropertyData(false)} className="btn btn-primary">
+              Try Again
+            </button>
+            <button onClick={() => navigate('/properties')} className="btn btn-secondary">
+              Back to Listings
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
