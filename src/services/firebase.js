@@ -41,6 +41,11 @@ export const loginWithGoogleFirebase = async () => {
       if (popupErr.code === 'auth/popup-closed-by-user' || popupErr.code === 'auth/cancelled-popup-request') {
         throw new Error('Google sign-in popup was closed.');
       }
+      if (popupErr.code === 'auth/unauthorized-domain') {
+        const currentHost = window.location.hostname;
+        console.warn(`[Firebase Domain Error]: "${currentHost}" is not in Firebase Authorized Domains.`);
+        throw new Error(`Domain "${currentHost}" is not authorized in Firebase. Please add "${currentHost}" to Firebase Console -> Authentication -> Settings -> Authorized Domains, or use http://localhost:5173.`);
+      }
       console.warn('[Firebase Google Auth Error]:', popupErr.message);
       throw new Error(popupErr.message || 'Google sign-in failed.');
     }
