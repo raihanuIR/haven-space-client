@@ -1,7 +1,15 @@
 import axios from 'axios';
 
+let rawBaseUrl = import.meta.env.VITE_API_URL || '/api';
+if (rawBaseUrl.endsWith('/')) {
+  rawBaseUrl = rawBaseUrl.slice(0, -1);
+}
+if (!rawBaseUrl.endsWith('/api') && rawBaseUrl.startsWith('http')) {
+  rawBaseUrl = `${rawBaseUrl}/api`;
+}
+
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL: rawBaseUrl,
 });
 
 // Automatically inject JWT Bearer token on every outgoing request
