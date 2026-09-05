@@ -70,40 +70,17 @@ const PropertyDetails = () => {
     }
 
     try {
-      // Step 1: Fetch primary property with auto-retry resilience
-      let propertyItem = null;
-      try {
-        const propRes = await API.get(`/properties/${rawId}`);
-        if (propRes.data?.success && propRes.data.property) {
-          propertyItem = propRes.data.property;
-        }
-      } catch (firstErr) {
-        // If 404, it truly doesn't exist
-        if (firstErr.response?.status === 404) {
-          setProperty(null);
-          setErrorMessage('Property not found. The listing may have been unlisted or removed.');
-          setLoading(false);
-          return;
-        }
-
-        // On network error or 500 (backend waking up / connecting to Atlas), auto-retry once after 800ms
-        console.warn('[PropertyDetails] First attempt failed, retrying in 800ms...', firstErr.message);
-        await new Promise((resolve) => setTimeout(resolve, 800));
-        const retryRes = await API.get(`/properties/${rawId}`);
-        if (retryRes.data?.success && retryRes.data.property) {
-          propertyItem = retryRes.data.property;
-        }
-      }
-
-      if (!propertyItem) {
+      // Step 1: Clean, direct property fetch (backend singleton assurance guarantees ready DB)
+      const propRes = await API.get(`/properties/${rawId}`);
+      if (propRes.data?.success && propRes.data.property) {
+        setProperty(propRes.data.property);
+        setLoading(false);
+      } else {
         setProperty(null);
-        setErrorMessage('Unable to load property details. The server may still be connecting.');
+        setErrorMessage('Property not found. The listing may have been unlisted or removed.');
         setLoading(false);
         return;
       }
-
-      setProperty(propertyItem);
-      setLoading(false);
 
       // Step 2: Fetch secondary reviews & favorites non-blocking so they NEVER crash the property view
       try {
