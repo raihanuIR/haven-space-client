@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import {
   Users,
   Building,
@@ -13,6 +13,7 @@ import {
   ChevronRight,
   ShieldCheck,
   AlertTriangle,
+  MapPin,
 } from 'lucide-react';
 import API from '../services/api';
 import RejectionFeedbackModal from '../components/RejectionFeedbackModal';
@@ -155,9 +156,9 @@ const AdminDashboard = () => {
               className={`dashboard-nav-item ${activeTab === 'users' ? 'active' : ''}`}
             >
               <Users size={18} />
-              <span>All Users</span>
+              <span>Users</span>
               {users.length > 0 && (
-                <span className="badge" style={{ marginLeft: 'auto', fontSize: '0.7rem', padding: '0.15rem 0.5rem', background: activeTab === 'users' ? 'rgba(255,255,255,0.25)' : 'var(--bg-tertiary)', color: activeTab === 'users' ? '#ffffff' : 'var(--text-muted)' }}>
+                <span className="badge" style={{ marginLeft: 'auto', fontSize: '0.7rem', padding: '0.12rem 0.4rem', background: activeTab === 'users' ? 'rgba(255,255,255,0.25)' : 'var(--bg-tertiary)', color: activeTab === 'users' ? '#ffffff' : 'var(--text-muted)' }}>
                   {users.length}
                 </span>
               )}
@@ -169,9 +170,9 @@ const AdminDashboard = () => {
               className={`dashboard-nav-item ${activeTab === 'properties' ? 'active' : ''}`}
             >
               <Building size={18} />
-              <span>All Properties</span>
+              <span>Properties</span>
               {properties.length > 0 && (
-                <span className="badge" style={{ marginLeft: 'auto', fontSize: '0.7rem', padding: '0.15rem 0.5rem', background: activeTab === 'properties' ? 'rgba(255,255,255,0.25)' : 'var(--bg-tertiary)', color: activeTab === 'properties' ? '#ffffff' : 'var(--text-muted)' }}>
+                <span className="badge" style={{ marginLeft: 'auto', fontSize: '0.7rem', padding: '0.12rem 0.4rem', background: activeTab === 'properties' ? 'rgba(255,255,255,0.25)' : 'var(--bg-tertiary)', color: activeTab === 'properties' ? '#ffffff' : 'var(--text-muted)' }}>
                   {properties.length}
                 </span>
               )}
@@ -183,7 +184,7 @@ const AdminDashboard = () => {
               className={`dashboard-nav-item ${activeTab === 'bookings' ? 'active' : ''}`}
             >
               <ClipboardList size={18} />
-              <span>All Bookings</span>
+              <span>Bookings</span>
             </button>
 
             <button
@@ -205,52 +206,91 @@ const AdminDashboard = () => {
                 {loading ? (
                   <LoadingSpinner text="Fetching platform accounts..." />
                 ) : (
-                  <div className="table-container">
-                    <table className="custom-table">
-                      <thead>
-                        <tr>
-                          <th>User Profile</th>
-                          <th>Email Address</th>
-                          <th>Current Role</th>
-                          <th>Change Role</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {users.map((u) => (
-                          <tr key={u._id}>
-                            <td>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                <img
-                                  src={u.photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80'}
-                                  alt={u.name}
-                                  style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
-                                />
-                                <strong>{u.name}</strong>
-                              </div>
-                            </td>
-                            <td>{u.email}</td>
-                            <td>
-                              <span className={`badge ${u.role === 'Admin' ? 'badge-rejected' : u.role === 'Owner' ? 'badge-pending' : 'badge-approved'}`}>
-                                {u.role}
-                              </span>
-                            </td>
-                            <td>
-                              <select
-                                className="form-select"
-                                style={{ width: '140px', padding: '0.4rem 0.6rem', fontSize: '0.85rem' }}
-                                value={u.role}
-                                onChange={(e) => handleRoleChange(u._id, e.target.value)}
-                              >
-                                <option value="Tenant">Tenant</option>
-                                <option value="Owner">Owner</option>
-                                <option value="Admin">Admin</option>
-                              </select>
-                            </td>
+                  <>
+                    {/* Desktop Table View */}
+                    <div className="table-container desktop-only-table">
+                      <table className="custom-table" style={{ minWidth: '680px' }}>
+                        <thead>
+                          <tr>
+                            <th>User Profile</th>
+                            <th>Email Address</th>
+                            <th>Current Role</th>
+                            <th>Change Role</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                        </thead>
+                        <tbody>
+                          {users.map((u) => (
+                            <tr key={u._id}>
+                              <td>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                  <img
+                                    src={u.photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80'}
+                                    alt={u.name}
+                                    style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+                                  />
+                                  <strong>{u.name}</strong>
+                                </div>
+                              </td>
+                              <td>{u.email}</td>
+                              <td>
+                                <span className={`badge ${u.role === 'Admin' ? 'badge-rejected' : u.role === 'Owner' ? 'badge-pending' : 'badge-approved'}`}>
+                                  {u.role}
+                                </span>
+                              </td>
+                              <td>
+                                <select
+                                  className="form-select"
+                                  style={{ width: '140px', padding: '0.4rem 0.6rem', fontSize: '0.85rem' }}
+                                  value={u.role}
+                                  onChange={(e) => handleRoleChange(u._id, e.target.value)}
+                                >
+                                  <option value="Tenant">Tenant</option>
+                                  <option value="Owner">Owner</option>
+                                  <option value="Admin">Admin</option>
+                                </select>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Mobile Cards View */}
+                    <div className="mobile-only-cards">
+                      {users.map((u) => (
+                        <div key={u._id} className="mobile-favorite-card">
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                            <img
+                              src={u.photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80'}
+                              alt={u.name}
+                              style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
+                            />
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <strong style={{ display: 'block', fontSize: '1rem' }}>{u.name}</strong>
+                              <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis' }}>{u.email}</span>
+                            </div>
+                            <span className={`badge ${u.role === 'Admin' ? 'badge-rejected' : u.role === 'Owner' ? 'badge-pending' : 'badge-approved'}`}>
+                              {u.role}
+                            </span>
+                          </div>
+
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', paddingTop: '0.5rem', borderTop: '1px solid var(--border-color)' }}>
+                            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Assign Role:</span>
+                            <select
+                              className="form-select"
+                              style={{ width: '150px', padding: '0.4rem 0.65rem', fontSize: '0.85rem' }}
+                              value={u.role}
+                              onChange={(e) => handleRoleChange(u._id, e.target.value)}
+                            >
+                              <option value="Tenant">Tenant</option>
+                              <option value="Owner">Owner</option>
+                              <option value="Admin">Admin</option>
+                            </select>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
                 )}
               </div>
             )}
@@ -262,80 +302,155 @@ const AdminDashboard = () => {
                 {loading ? (
                   <LoadingSpinner text="Loading all properties..." />
                 ) : (
-                  <div className="table-container">
-                    <table className="custom-table">
-                      <thead>
-                        <tr>
-                          <th>Property Title</th>
-                          <th>Owner</th>
-                          <th>Rent Price</th>
-                          <th>Status</th>
-                          <th>Moderation Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {properties.map((prop) => (
-                          <tr key={prop._id}>
-                            <td>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                <img
-                                  src={prop.images?.[0] || 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=100&q=80'}
-                                  alt={prop.title}
-                                  style={{ width: '44px', height: '44px', borderRadius: 'var(--radius-sm)', objectFit: 'cover' }}
-                                />
-                                <div>
-                                  <strong>{prop.title}</strong>
-                                  <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)' }}>{prop.location}</span>
+                  <>
+                    {/* Desktop Table View */}
+                    <div className="table-container desktop-only-table">
+                      <table className="custom-table" style={{ minWidth: '780px' }}>
+                        <thead>
+                          <tr>
+                            <th style={{ minWidth: '220px' }}>Property Title</th>
+                            <th style={{ minWidth: '160px' }}>Owner</th>
+                            <th style={{ minWidth: '110px' }}>Rent Price</th>
+                            <th style={{ minWidth: '120px' }}>Status</th>
+                            <th style={{ minWidth: '180px', textAlign: 'center' }}>Moderation Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {properties.map((prop) => (
+                            <tr key={prop._id}>
+                              <td>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                  <img
+                                    src={prop.images?.[0] || 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=100&q=80'}
+                                    alt={prop.title}
+                                    style={{ width: '48px', height: '48px', borderRadius: 'var(--radius-sm)', objectFit: 'cover', flexShrink: 0 }}
+                                  />
+                                  <div>
+                                    <strong style={{ display: 'block', lineHeight: 1.3 }}>{prop.title}</strong>
+                                    <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)' }}>{prop.location}</span>
+                                  </div>
                                 </div>
-                              </div>
-                            </td>
-                            <td>
-                              <strong>{prop.owner?.name}</strong>
-                              <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)' }}>{prop.owner?.email}</span>
-                            </td>
-                            <td><strong>${prop.rentPrice?.toLocaleString()}</strong></td>
-                            <td>
+                              </td>
+                              <td>
+                                <strong>{prop.owner?.name}</strong>
+                                <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)' }}>{prop.owner?.email}</span>
+                              </td>
+                              <td style={{ whiteSpace: 'nowrap' }}><strong>${prop.rentPrice?.toLocaleString()}</strong></td>
+                              <td>
+                                <span className={`badge ${
+                                  prop.status === 'Approved' ? 'badge-approved' :
+                                  prop.status === 'Pending' ? 'badge-pending' : 'badge-rejected'
+                                }`}>
+                                  {prop.status}
+                                </span>
+                              </td>
+                              <td style={{ textAlign: 'center' }}>
+                                <div style={{ display: 'inline-flex', gap: '0.4rem' }}>
+                                  {prop.status !== 'Approved' && (
+                                    <button
+                                      onClick={() => handleApproveProperty(prop._id)}
+                                      className="btn btn-primary btn-sm"
+                                      title="Approve Property"
+                                    >
+                                      Approve
+                                    </button>
+                                  )}
+                                  {prop.status !== 'Rejected' && (
+                                    <button
+                                      onClick={() => handleOpenRejectModal(prop)}
+                                      className="btn btn-secondary btn-sm"
+                                      title="Reject with Feedback"
+                                    >
+                                      Reject
+                                    </button>
+                                  )}
+                                  <button
+                                    onClick={() => handleDeleteProperty(prop._id)}
+                                    className="btn btn-danger btn-sm"
+                                    title="Delete Property"
+                                  >
+                                    <Trash2 size={15} />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Mobile Cards View */}
+                    <div className="mobile-only-cards">
+                      {properties.map((prop) => (
+                        <div key={prop._id} className="mobile-booking-card">
+                          <div className="mobile-booking-hero">
+                            <img
+                              src={prop.images?.[0] || 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=80'}
+                              alt={prop.title}
+                              loading="lazy"
+                            />
+                            <div className="mobile-hero-badge-left">
                               <span className={`badge ${
                                 prop.status === 'Approved' ? 'badge-approved' :
                                 prop.status === 'Pending' ? 'badge-pending' : 'badge-rejected'
                               }`}>
                                 {prop.status}
                               </span>
-                            </td>
-                            <td>
-                              <div style={{ display: 'flex', gap: '0.4rem' }}>
-                                {prop.status !== 'Approved' && (
-                                  <button
-                                    onClick={() => handleApproveProperty(prop._id)}
-                                    className="btn btn-primary btn-sm"
-                                    title="Approve Property"
-                                  >
-                                    Approve
-                                  </button>
-                                )}
-                                {prop.status !== 'Rejected' && (
-                                  <button
-                                    onClick={() => handleOpenRejectModal(prop)}
-                                    className="btn btn-secondary btn-sm"
-                                    title="Reject with Feedback"
-                                  >
-                                    Reject
-                                  </button>
-                                )}
+                            </div>
+                            <div className="mobile-hero-price-chip">
+                              ${prop.rentPrice?.toLocaleString()}/{prop.rentType?.toLowerCase() || 'mo'}
+                            </div>
+                          </div>
+
+                          <div className="mobile-booking-body">
+                            <div>
+                              <h4 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: '0.25rem', lineHeight: 1.35 }}>
+                                {prop.title}
+                              </h4>
+                              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                <MapPin size={14} /> {prop.location}
+                              </span>
+                            </div>
+
+                            <div style={{ background: 'var(--bg-tertiary)', padding: '0.65rem 0.85rem', borderRadius: 'var(--radius-md)', fontSize: '0.82rem' }}>
+                              <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.72rem', textTransform: 'uppercase', fontWeight: 600 }}>Owner Contact</span>
+                              <strong>{prop.owner?.name}</strong> &middot; <span style={{ color: 'var(--text-muted)' }}>{prop.owner?.email}</span>
+                            </div>
+
+                            {/* Actions */}
+                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
+                              {prop.status !== 'Approved' && (
                                 <button
-                                  onClick={() => handleDeleteProperty(prop._id)}
-                                  className="btn btn-danger btn-sm"
-                                  title="Delete Property"
+                                  onClick={() => handleApproveProperty(prop._id)}
+                                  className="btn btn-primary btn-sm"
+                                  style={{ flex: 1, justifyContent: 'center' }}
                                 >
-                                  <Trash2 size={15} />
+                                  Approve
                                 </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                              )}
+                              {prop.status !== 'Rejected' && (
+                                <button
+                                  onClick={() => handleOpenRejectModal(prop)}
+                                  className="btn btn-secondary btn-sm"
+                                  style={{ flex: 1, justifyContent: 'center' }}
+                                >
+                                  Reject
+                                </button>
+                              )}
+                              <button
+                                onClick={() => handleDeleteProperty(prop._id)}
+                                className="btn btn-danger btn-sm"
+                                style={{ padding: '0.4rem 0.75rem' }}
+                                title="Delete Property"
+                              >
+                                <Trash2 size={15} />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
                 )}
               </div>
             )}
@@ -348,8 +463,9 @@ const AdminDashboard = () => {
                   <LoadingSpinner text="Fetching bookings records..." />
                 ) : (
                   <>
-                    <div className="table-container">
-                      <table className="custom-table">
+                    {/* Desktop Table View */}
+                    <div className="table-container desktop-only-table">
+                      <table className="custom-table" style={{ minWidth: '780px' }}>
                         <thead>
                           <tr>
                             <th>Property</th>
@@ -385,6 +501,45 @@ const AdminDashboard = () => {
                       </table>
                     </div>
 
+                    {/* Mobile Cards View */}
+                    <div className="mobile-only-cards">
+                      {bookings.map((b) => (
+                        <div key={b._id} className="mobile-favorite-card">
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
+                            <div>
+                              <h4 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: '0.2rem' }}>{b.propertyName}</h4>
+                              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Tenant: {b.tenantName}</span>
+                            </div>
+                            <span className={`badge ${
+                              b.bookingStatus === 'Approved' ? 'badge-approved' :
+                              b.bookingStatus === 'Pending' ? 'badge-pending' : 'badge-rejected'
+                            }`}>
+                              {b.bookingStatus}
+                            </span>
+                          </div>
+
+                          <div className="mobile-booking-info-box">
+                            <div className="mobile-booking-info-item">
+                              <span className="info-item-label">Tenant Email</span>
+                              <span className="info-item-value" style={{ fontSize: '0.82rem' }}>{b.tenantEmail}</span>
+                            </div>
+                            <div className="mobile-booking-info-item">
+                              <span className="info-item-label">Owner Email</span>
+                              <span className="info-item-value" style={{ fontSize: '0.82rem' }}>{b.ownerEmail}</span>
+                            </div>
+                            <div className="mobile-booking-info-item">
+                              <span className="info-item-label">Move-In Date</span>
+                              <span className="info-item-value">{new Date(b.moveInDate).toLocaleDateString()}</span>
+                            </div>
+                            <div className="mobile-booking-info-item">
+                              <span className="info-item-label">Amount Paid</span>
+                              <span className="info-item-value" style={{ color: 'var(--accent-primary)' }}>${b.amountPaid?.toLocaleString()}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
                     {/* Pagination Controls */}
                     {totalBookingPages > 1 && (
                       <div className="pagination-container">
@@ -418,8 +573,9 @@ const AdminDashboard = () => {
                   <LoadingSpinner text="Fetching payment audit records..." />
                 ) : (
                   <>
-                    <div className="table-container">
-                      <table className="custom-table">
+                    {/* Desktop Table View */}
+                    <div className="table-container desktop-only-table">
+                      <table className="custom-table" style={{ minWidth: '780px' }}>
                         <thead>
                           <tr>
                             <th>Transaction ID</th>
@@ -447,6 +603,41 @@ const AdminDashboard = () => {
                           ))}
                         </tbody>
                       </table>
+                    </div>
+
+                    {/* Mobile Cards View */}
+                    <div className="mobile-only-cards">
+                      {transactions.map((tx) => (
+                        <div key={tx._id} className="mobile-favorite-card">
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            <code style={{ fontSize: '0.78rem', background: 'var(--bg-tertiary)', padding: '0.25rem 0.5rem', borderRadius: 'var(--radius-sm)' }}>
+                              {tx.transactionId}
+                            </code>
+                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                              {new Date(tx.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+
+                          <div style={{ margin: '0.25rem 0' }}>
+                            <strong style={{ fontSize: '1.05rem', display: 'block' }}>{tx.propertyName}</strong>
+                          </div>
+
+                          <div className="mobile-booking-info-box">
+                            <div className="mobile-booking-info-item">
+                              <span className="info-item-label">Tenant</span>
+                              <span className="info-item-value" style={{ fontSize: '0.85rem' }}>{tx.tenantName}</span>
+                            </div>
+                            <div className="mobile-booking-info-item">
+                              <span className="info-item-label">Owner</span>
+                              <span className="info-item-value" style={{ fontSize: '0.85rem' }}>{tx.ownerName}</span>
+                            </div>
+                            <div className="mobile-booking-info-item" style={{ gridColumn: 'span 2' }}>
+                              <span className="info-item-label">Total Amount Paid</span>
+                              <span className="info-item-value" style={{ color: 'var(--success)', fontSize: '1.1rem' }}>${tx.amount?.toLocaleString()}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
 
                     {/* Pagination */}
