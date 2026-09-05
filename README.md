@@ -22,18 +22,6 @@ A premier, high-converting digital rental marketplace connecting discerning tena
 
 ---
 
-## 🔑 Demo Access Credentials
-
-The platform includes pre-seeded accounts across all three user tiers. You can log in manually or use the 1-click fill buttons directly on the **[Login Page](https://haven-space-client.vercel.app/login)**:
-
-| Role | Email | Password | Access Privileges |
-| :--- | :--- | :--- | :--- |
-| **Admin** | `admin@rentalhub.com` | `AdminPassword123!` | System-wide moderation, change user roles, approve/reject properties with feedback modal, audit paginated bookings and payments. |
-| **Owner** | `owner@rentalhub.com` | `OwnerPassword123!` | 12-Month Recharts earnings line chart, Download Earnings PDF, publish new listings, view rejection feedback (👁️), approve/reject booking requests. |
-| **Tenant** | `tenant@rentalhub.com` | `TenantPassword123!` | Browse catalog, filter & sort listings, bookmark favorites, reserve properties via Stripe with confetti celebration, submit ratings & reviews. |
-
----
-
 ## 🎯 Purpose & Scope
 
 RentalHub simplifies the end-to-end residential leasing journey. Tenants discover verified listings, make digital reservations with secure Stripe checkout, and track their lease agreements. Property owners gain automated tenant management, transparent financial earnings visualization, and effortless property publishing. Administrators maintain platform integrity through user role controls and transparent listing moderation.
