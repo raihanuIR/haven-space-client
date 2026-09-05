@@ -663,6 +663,7 @@ button, input, select, textarea {
 .table-container {
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
@@ -671,6 +672,7 @@ button, input, select, textarea {
 
 .custom-table {
   width: 100%;
+  min-width: 620px;
   border-collapse: collapse;
   text-align: left;
   font-size: 0.925rem;
@@ -807,7 +809,7 @@ button, input, select, textarea {
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: var(--shadow-xl);
-  padding: 2rem;
+  padding: clamp(1.25rem, 4vw, 2rem);
   position: relative;
   animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -896,7 +898,87 @@ button, input, select, textarea {
   cursor: not-allowed;
 }
 
-/* Media Queries for Full Responsiveness */
+/* Layout & Grid Utilities */
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.locations-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+
+.market-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+
+.catalog-filter-form {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1.5fr auto auto;
+  gap: 1rem;
+  align-items: center;
+}
+
+.property-details-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+.property-gallery-main {
+  width: 100%;
+  height: clamp(280px, 45vw, 520px);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  position: relative;
+  box-shadow: var(--shadow-xl);
+}
+
+.specs-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.amenities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+/* User Nav Responsive Helpers */
+.user-nav-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: inline;
+}
+
+.user-nav-badge {
+  display: inline-block;
+}
+
+.user-nav-btn-text {
+  display: inline;
+}
+
+.auth-card {
+  width: 100%;
+}
+
+/* Media Queries for Full Responsiveness Across All Devices */
 @media (max-width: 1400px) {
   .search-inputs-grid {
     grid-template-columns: repeat(6, 1fr);
@@ -936,11 +1018,39 @@ button, input, select, textarea {
   .features-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+  .locations-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .market-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
   .footer-grid {
     grid-template-columns: 1fr 1fr;
   }
   .dashboard-layout {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .dashboard-sidebar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 1rem;
+  }
+  .dashboard-nav-item {
+    flex: 1 1 auto;
+    min-width: 140px;
+    justify-content: center;
+  }
+  .property-details-layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .catalog-filter-form {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .catalog-filter-form > :last-child {
+    grid-column: span 2;
   }
 }
 
@@ -951,6 +1061,9 @@ button, input, select, textarea {
   .mobile-toggle {
     display: block;
   }
+  .user-nav-name {
+    display: none;
+  }
   .properties-grid {
     grid-template-columns: 1fr;
   }
@@ -960,15 +1073,45 @@ button, input, select, textarea {
   .stats-grid {
     grid-template-columns: 1fr;
   }
+  .locations-grid {
+    grid-template-columns: 1fr;
+  }
   .footer-grid {
     grid-template-columns: 1fr;
   }
   .hero-content h1 {
-    font-size: 2.3rem;
+    font-size: clamp(2rem, 6vw, 2.5rem);
+  }
+  .catalog-filter-form {
+    grid-template-columns: 1fr;
+  }
+  .catalog-filter-form > :last-child {
+    grid-column: span 1;
+  }
+  .form-grid-3 {
+    grid-template-columns: 1fr;
+  }
+  .custom-table {
+    min-width: 580px;
   }
 }
 
 @media (max-width: 640px) {
+  .user-nav-btn-text {
+    display: none;
+  }
+  .user-nav-badge {
+    display: none;
+  }
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+  }
+  .market-stats-grid {
+    grid-template-columns: 1fr;
+  }
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
   .search-inputs-grid {
     grid-template-columns: repeat(6, 1fr);
     gap: 0.85rem;
@@ -988,5 +1131,32 @@ button, input, select, textarea {
   .search-submit-btn {
     grid-column: span 6;
     width: 100%;
+  }
+  .footer-bottom {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+    justify-content: center;
+  }
+  .modal-overlay {
+    padding: 0.75rem;
+  }
+  .modal-content {
+    padding: 1.25rem;
+    max-height: 94vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .specs-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .amenities-grid {
+    grid-template-columns: 1fr;
+  }
+  .dashboard-nav-item {
+    min-width: 100%;
+    text-align: center;
+    justify-content: center;
   }
 }

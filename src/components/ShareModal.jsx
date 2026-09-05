@@ -50,7 +50,7 @@ const ShareModal = ({ property, isOpen, onClose }) => {
         </div>
 
         {/* Social Share Buttons */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
+        <div className="form-grid-3">
           <a
             href={`https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`}
             target="_blank"

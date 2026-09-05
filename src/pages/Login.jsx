@@ -42,13 +42,13 @@ const Login = () => {
 
   return (
     <div className="page-wrapper" style={{ justifyContent: 'center', alignItems: 'center', padding: '4rem 1rem' }}>
-      <div style={{
+      <div className="auth-card" style={{
         width: '100%',
         maxWidth: '480px',
         backgroundColor: 'var(--bg-card)',
         border: '1px solid var(--border-color)',
         borderRadius: 'var(--radius-lg)',
-        padding: '2.5rem',
+        padding: 'clamp(1.25rem, 5vw, 2.5rem)',
         boxShadow: 'var(--shadow-xl)',
       }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>

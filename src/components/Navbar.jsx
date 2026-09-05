@@ -74,21 +74,21 @@ const Navbar = () => {
           </button>
 
           {isAuthenticated ? (
-            <div className="user-menu" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div className="user-menu" style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
               <Link to="/dashboard/profile" title="View Profile" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <img
                   src={user?.photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80'}
                   alt={user?.name}
                   className="user-avatar"
                 />
-                <span style={{ fontWeight: 600, fontSize: '0.9rem', display: 'none', '@media(minWidth: 768px)': { display: 'inline' } }}>
+                <span className="user-nav-name">
                   {user?.name?.split(' ')[0]}
                 </span>
-                <span className="badge badge-role">{user?.role}</span>
+                <span className="badge badge-role user-nav-badge">{user?.role}</span>
               </Link>
               <button onClick={handleLogout} className="btn btn-secondary btn-sm" title="Logout">
                 <LogOut size={16} />
-                <span>Logout</span>
+                <span className="user-nav-btn-text">Logout</span>
               </button>
             </div>
           ) : (

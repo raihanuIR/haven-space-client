@@ -516,7 +516,7 @@ const OwnerDashboard = () => {
                     />
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div className="form-grid-2">
                     <div className="form-group">
                       <label className="form-label">Location (City, State / Full Address) *</label>
                       <input
@@ -545,7 +545,7 @@ const OwnerDashboard = () => {
                     </div>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div className="form-grid-2">
                     <div className="form-group">
                       <label className="form-label">Rent (Price in USD) *</label>
                       <input
@@ -572,7 +572,7 @@ const OwnerDashboard = () => {
                     </div>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+                  <div className="form-grid-3">
                     <div className="form-group">
                       <label className="form-label">Bedrooms *</label>
                       <input

@@ -190,7 +190,7 @@ const PropertyDetails = () => {
 
         {/* Gallery Section */}
         <div style={{ marginBottom: '3rem' }}>
-          <div style={{ height: '520px', borderRadius: 'var(--radius-lg)', overflow: 'hidden', marginBottom: '1rem', boxShadow: 'var(--shadow-lg)' }}>
+          <div className="property-gallery-main">
             <img
               src={property.images[selectedImage] || property.images[0]}
               alt={property.title}
@@ -216,6 +216,7 @@ const PropertyDetails = () => {
                     border: selectedImage === idx ? '3px solid var(--accent-primary)' : '2px solid transparent',
                     opacity: selectedImage === idx ? 1 : 0.7,
                     transition: 'all 0.2s',
+                    flexShrink: 0,
                   }}
                 />
               ))}
@@ -224,21 +225,11 @@ const PropertyDetails = () => {
         </div>
 
         {/* Two-Column Layout: Details + Booking Card */}
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '3rem' }}>
+        <div className="property-details-layout">
           {/* Left Column: Specs, Description, Amenities, Reviews */}
           <div>
             {/* Key Specs Card */}
-            <div style={{
-              background: 'var(--bg-card)',
-              border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius-lg)',
-              padding: '1.5rem',
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: '1.5rem',
-              marginBottom: '2rem',
-              textAlign: 'center',
-            }}>
+            <div className="specs-summary-grid">
               <div>
                 <Bed size={24} color="var(--accent-primary)" style={{ margin: '0 auto 0.4rem auto' }} />
                 <span style={{ display: 'block', fontWeight: 700, fontSize: '1.1rem' }}>{property.bedrooms} Bedrooms</span>
@@ -268,7 +259,7 @@ const PropertyDetails = () => {
             {property.amenities && property.amenities.length > 0 && (
               <div style={{ marginBottom: '2.5rem' }}>
                 <h2 style={{ fontSize: '1.45rem', marginBottom: '1rem' }}>Offered Amenities</h2>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.85rem' }}>
+                <div className="amenities-grid">
                   {property.amenities.map((amenity, i) => (
                     <div
                       key={i}

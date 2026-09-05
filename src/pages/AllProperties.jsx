@@ -116,7 +116,7 @@ const AllProperties = () => {
           marginBottom: '2.5rem',
           boxShadow: 'var(--shadow-md)',
         }}>
-          <form onSubmit={handleSearchSubmit} style={{ display: 'grid', gridTemplateColumns: '2fr 1.5fr 1.5fr auto auto', gap: '1rem', alignItems: 'flex-end' }}>
+          <form onSubmit={handleSearchSubmit} className="catalog-filter-form">
             {/* Search by location */}
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label className="form-label">Search Location</label>

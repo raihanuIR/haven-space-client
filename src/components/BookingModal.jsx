@@ -56,14 +56,11 @@ const BookingModal = ({ property, isOpen, onClose, onProceedToPayment }) => {
 
         <form onSubmit={handleSubmit}>
           {/* User Info (Read only) */}
-          <div style={{
+          <div className="form-grid-2" style={{
             background: 'var(--bg-tertiary)',
             padding: '1rem',
             borderRadius: 'var(--radius-md)',
             marginBottom: '1.25rem',
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '0.75rem',
             fontSize: '0.875rem',
           }}>
             <div>

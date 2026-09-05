@@ -355,7 +355,7 @@ const Home = () => {
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
+          <div className="locations-grid">
             {topLocations.map((loc, i) => (
               <motion.div
                 key={i}
@@ -401,40 +401,34 @@ const Home = () => {
           <div style={{
             background: 'var(--accent-gradient)',
             borderRadius: 'var(--radius-lg)',
-            padding: '4rem 2rem',
+            padding: 'clamp(2rem, 5vw, 4rem) clamp(1.25rem, 4vw, 2rem)',
             color: '#ffffff',
             textAlign: 'center',
             boxShadow: 'var(--shadow-xl)',
           }}>
-            <h2 style={{ color: '#ffffff', fontSize: '2.5rem', marginBottom: '1rem' }}>
+            <h2 style={{ color: '#ffffff', fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', marginBottom: '1rem' }}>
               The Marketplace Trusted by Modern Renters
             </h2>
-            <p style={{ maxWidth: '640px', margin: '0 auto 3rem auto', fontSize: '1.1rem', opacity: 0.9 }}>
+            <p style={{ maxWidth: '640px', margin: '0 auto 2.5rem auto', fontSize: '1.05rem', opacity: 0.9 }}>
               From boutique studios to expansive waterfront penthouses, our platform manages end-to-end leasing with exceptional satisfaction.
             </p>
 
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
-              gap: '2rem',
-              maxWidth: '900px',
-              margin: '0 auto',
-            }}>
+            <div className="market-stats-grid">
               <div>
-                <div style={{ fontSize: '2.8rem', fontWeight: 800, fontFamily: 'Outfit' }}>1,800+</div>
-                <div style={{ opacity: 0.85, fontSize: '0.95rem' }}>Verified Listings</div>
+                <div style={{ fontSize: '2.5rem', fontWeight: 800, fontFamily: 'Outfit' }}>1,800+</div>
+                <div style={{ opacity: 0.85, fontSize: '0.9rem' }}>Verified Listings</div>
               </div>
               <div>
-                <div style={{ fontSize: '2.8rem', fontWeight: 800, fontFamily: 'Outfit' }}>98.6%</div>
-                <div style={{ opacity: 0.85, fontSize: '0.95rem' }}>Tenant Satisfaction</div>
+                <div style={{ fontSize: '2.5rem', fontWeight: 800, fontFamily: 'Outfit' }}>98.6%</div>
+                <div style={{ opacity: 0.85, fontSize: '0.9rem' }}>Tenant Satisfaction</div>
               </div>
               <div>
-                <div style={{ fontSize: '2.8rem', fontWeight: 800, fontFamily: 'Outfit' }}>$4.2M+</div>
-                <div style={{ opacity: 0.85, fontSize: '0.95rem' }}>Processed Escrow</div>
+                <div style={{ fontSize: '2.5rem', fontWeight: 800, fontFamily: 'Outfit' }}>$4.2M+</div>
+                <div style={{ opacity: 0.85, fontSize: '0.9rem' }}>Processed Escrow</div>
               </div>
               <div>
-                <div style={{ fontSize: '2.8rem', fontWeight: 800, fontFamily: 'Outfit' }}>24/7</div>
-                <div style={{ opacity: 0.85, fontSize: '0.95rem' }}>Dedicated Support</div>
+                <div style={{ fontSize: '2.5rem', fontWeight: 800, fontFamily: 'Outfit' }}>24/7</div>
+                <div style={{ opacity: 0.85, fontSize: '0.9rem' }}>Dedicated Support</div>
               </div>
             </div>
           </div>
