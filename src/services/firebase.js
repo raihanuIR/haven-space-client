@@ -2,12 +2,12 @@ import { initializeApp, getApps } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyDemoFirebaseKey123456789',
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'rentalhub-demo.firebaseapp.com',
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'rentalhub-demo',
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'rentalhub-demo.appspot.com',
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '123456789012',
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:123456789012:web:abcdef123456',
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyCktchvQqak0cPn9ZMhxmxdEtnV2O6hnK8',
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'haven-space-ed64d.firebaseapp.com',
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'haven-space-ed64d',
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'haven-space-ed64d.firebasestorage.app',
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '99907910586',
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:99907910586:web:0beeb3e7f055c646c87b83',
 };
 
 let app;
@@ -22,22 +22,31 @@ try {
   }
   auth = getAuth(app);
   googleProvider = new GoogleAuthProvider();
+  googleProvider.setCustomParameters({ prompt: 'select_account' });
 } catch (err) {
   console.warn('[Firebase Init Warning]:', err.message);
 }
 
 export const loginWithGoogleFirebase = async () => {
-  if (auth && googleProvider && !firebaseConfig.apiKey.includes('DemoFirebaseKey')) {
-    const result = await signInWithPopup(auth, googleProvider);
-    const user = result.user;
-    return {
-      name: user.displayName || 'Google User',
-      email: user.email,
-      photo: user.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
-    };
+  if (auth && googleProvider) {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      return {
+        name: user.displayName || 'Google User',
+        email: user.email,
+        photo: user.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+      };
+    } catch (popupErr) {
+      if (popupErr.code === 'auth/popup-closed-by-user' || popupErr.code === 'auth/cancelled-popup-request') {
+        throw new Error('Google sign-in popup was closed.');
+      }
+      console.warn('[Firebase Google Auth Error]:', popupErr.message);
+      throw new Error(popupErr.message || 'Google sign-in failed.');
+    }
   }
 
-  // Seamless fallback simulation for local test / evaluation without live Firebase console setup
+  // Fallback simulation
   return {
     name: 'Google Tenant User',
     email: `google.user_${Date.now().toString().slice(-4)}@gmail.com`,
