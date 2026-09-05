@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import {
   BarChart3,
   PlusCircle,
@@ -17,6 +17,8 @@ import {
   User,
   Check,
   X,
+  MapPin,
+  Phone,
 } from 'lucide-react';
 import {
   LineChart,
@@ -240,7 +242,7 @@ const OwnerDashboard = () => {
               className={`dashboard-nav-item ${activeTab === 'analytics' ? 'active' : ''}`}
             >
               <BarChart3 size={18} />
-              <span>Earnings Analytics</span>
+              <span>Analytics</span>
             </button>
 
             <button
@@ -249,7 +251,12 @@ const OwnerDashboard = () => {
               className={`dashboard-nav-item ${activeTab === 'properties' ? 'active' : ''}`}
             >
               <Building size={18} />
-              <span>My Properties</span>
+              <span>Properties</span>
+              {myProperties.length > 0 && (
+                <span className="badge" style={{ marginLeft: 'auto', fontSize: '0.7rem', padding: '0.12rem 0.4rem', background: activeTab === 'properties' ? 'rgba(255,255,255,0.25)' : 'var(--bg-tertiary)', color: activeTab === 'properties' ? '#ffffff' : 'var(--text-muted)' }}>
+                  {myProperties.length}
+                </span>
+              )}
             </button>
 
             <button
@@ -258,7 +265,7 @@ const OwnerDashboard = () => {
               className={`dashboard-nav-item ${activeTab === 'add' ? 'active' : ''}`}
             >
               <PlusCircle size={18} />
-              <span>Add Property</span>
+              <span>Add Listing</span>
             </button>
 
             <button
@@ -267,7 +274,12 @@ const OwnerDashboard = () => {
               className={`dashboard-nav-item ${activeTab === 'requests' ? 'active' : ''}`}
             >
               <ClipboardList size={18} />
-              <span>Booking Requests</span>
+              <span>Requests</span>
+              {bookingRequests.filter((r) => r.bookingStatus === 'Pending').length > 0 && (
+                <span className="badge" style={{ marginLeft: 'auto', fontSize: '0.7rem', padding: '0.12rem 0.4rem', background: activeTab === 'requests' ? 'rgba(255,255,255,0.25)' : 'var(--warning)', color: activeTab === 'requests' ? '#ffffff' : '#000000' }}>
+                  {bookingRequests.filter((r) => r.bookingStatus === 'Pending').length}
+                </span>
+              )}
             </button>
           </aside>
 
@@ -332,13 +344,14 @@ const OwnerDashboard = () => {
                       background: 'var(--bg-card)',
                       border: '1px solid var(--border-color)',
                       borderRadius: 'var(--radius-lg)',
-                      padding: '2rem',
+                      padding: 'clamp(1rem, 3vw, 2rem)',
                       boxShadow: 'var(--shadow-md)',
+                      minWidth: 0,
                     }}>
-                      <h3 style={{ fontSize: '1.2rem', marginBottom: '1.5rem' }}>Monthly Earnings Overview (Last 12 Months)</h3>
-                      <div style={{ width: '100%', height: 320 }}>
-                        <ResponsiveContainer>
-                          <AreaChart data={analytics?.monthlyData || []}>
+                      <h3 style={{ fontSize: '1.15rem', marginBottom: '1.25rem' }}>Monthly Earnings Overview (Last 12 Months)</h3>
+                      <div style={{ width: '100%', height: 280, minWidth: 0 }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={analytics?.monthlyData || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                             <defs>
                               <linearGradient id="earningsGrad" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.4} />
@@ -346,8 +359,8 @@ const OwnerDashboard = () => {
                               </linearGradient>
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-                            <XAxis dataKey="month" stroke="var(--text-muted)" fontSize={12} />
-                            <YAxis stroke="var(--text-muted)" fontSize={12} tickFormatter={(val) => `$${val}`} />
+                            <XAxis dataKey="month" stroke="var(--text-muted)" fontSize={11} />
+                            <YAxis stroke="var(--text-muted)" fontSize={11} tickFormatter={(val) => `$${val}`} />
                             <Tooltip
                               formatter={(value) => [`$${value.toLocaleString()}`, 'Earnings']}
                               contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', borderRadius: '8px' }}
@@ -398,86 +411,178 @@ const OwnerDashboard = () => {
                     <button onClick={() => setActiveTab('add')} className="btn btn-primary">Add Property</button>
                   </div>
                 ) : (
-                  <div className="table-container">
-                    <table className="custom-table">
-                      <thead>
-                        <tr>
-                          <th>Property Title</th>
-                          <th>Type</th>
-                          <th>Rent Price</th>
-                          <th>Status</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {myProperties.map((prop) => (
-                          <tr key={prop._id}>
-                            <td>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                <img
-                                  src={prop.images?.[0] || 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=100&q=80'}
-                                  alt={prop.title}
-                                  style={{ width: '48px', height: '48px', borderRadius: 'var(--radius-sm)', objectFit: 'cover' }}
-                                />
-                                <div>
-                                  <strong>{prop.title}</strong>
-                                  <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)' }}>{prop.location}</span>
+                  <>
+                    {/* Desktop Table View */}
+                    <div className="table-container desktop-only-table">
+                      <table className="custom-table" style={{ minWidth: '760px' }}>
+                        <thead>
+                          <tr>
+                            <th style={{ minWidth: '240px' }}>Property Title</th>
+                            <th style={{ minWidth: '110px' }}>Type</th>
+                            <th style={{ minWidth: '120px' }}>Rent Price</th>
+                            <th style={{ minWidth: '130px' }}>Status</th>
+                            <th style={{ minWidth: '120px', textAlign: 'center' }}>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {myProperties.map((prop) => (
+                            <tr key={prop._id}>
+                              <td>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                  <img
+                                    src={prop.images?.[0] || 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=100&q=80'}
+                                    alt={prop.title}
+                                    style={{ width: '48px', height: '48px', borderRadius: 'var(--radius-sm)', objectFit: 'cover', flexShrink: 0 }}
+                                  />
+                                  <div style={{ minWidth: 0 }}>
+                                    <strong style={{ display: 'block', lineHeight: 1.3 }}>{prop.title}</strong>
+                                    <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)' }}>{prop.location}</span>
+                                  </div>
                                 </div>
-                              </div>
-                            </td>
-                            <td><span className="badge badge-approved">{prop.propertyType}</span></td>
-                            <td><strong>${prop.rentPrice?.toLocaleString()}</strong>/{prop.rentType?.toLowerCase()}</td>
-                            <td>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <span className={`badge ${
-                                  prop.status === 'Approved' ? 'badge-approved' :
-                                  prop.status === 'Pending' ? 'badge-pending' : 'badge-rejected'
-                                }`}>
-                                  {prop.status}
-                                </span>
+                              </td>
+                              <td><span className="badge badge-approved">{prop.propertyType}</span></td>
+                              <td style={{ whiteSpace: 'nowrap' }}><strong>${prop.rentPrice?.toLocaleString()}</strong>/{prop.rentType?.toLowerCase()}</td>
+                              <td>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                  <span className={`badge ${
+                                    prop.status === 'Approved' ? 'badge-approved' :
+                                    prop.status === 'Pending' ? 'badge-pending' : 'badge-rejected'
+                                  }`}>
+                                    {prop.status}
+                                  </span>
 
-                                {/* Challenge Requirement 4: Owner can view rejection feedback on rejected property via 👁️ button */}
-                                {prop.status === 'Rejected' && (
-                                  <button
-                                    onClick={() => {
-                                      setSelectedRejectedProperty(prop);
-                                      setFeedbackModalOpen(true);
-                                    }}
-                                    className="theme-toggle-btn"
-                                    style={{ width: '32px', height: '32px', color: 'var(--danger)' }}
-                                    title="View Rejection Reason & Feedback"
+                                  {/* Challenge Requirement 4: Owner can view rejection feedback on rejected property via 👁️ button */}
+                                  {prop.status === 'Rejected' && (
+                                    <button
+                                      onClick={() => {
+                                        setSelectedRejectedProperty(prop);
+                                        setFeedbackModalOpen(true);
+                                      }}
+                                      className="theme-toggle-btn"
+                                      style={{ width: '32px', height: '32px', color: 'var(--danger)' }}
+                                      title="View Rejection Reason & Feedback"
+                                    >
+                                      <Eye size={16} />
+                                    </button>
+                                  )}
+                                </div>
+                              </td>
+                              <td style={{ textAlign: 'center' }}>
+                                <div style={{ display: 'inline-flex', gap: '0.5rem' }}>
+                                  <Link
+                                    to={`/properties/${prop._id}`}
+                                    className="btn btn-secondary btn-sm"
+                                    title="View Live Listing"
+                                    style={{ padding: '0.4rem 0.6rem' }}
                                   >
-                                    <Eye size={16} />
+                                    <Eye size={15} />
+                                  </Link>
+                                  <button
+                                    onClick={() => handleDeleteProperty(prop._id)}
+                                    className="btn btn-danger btn-sm"
+                                    title="Delete Property"
+                                    style={{ padding: '0.4rem 0.6rem' }}
+                                  >
+                                    <Trash2 size={15} />
                                   </button>
-                                )}
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Mobile Cards View */}
+                    <div className="mobile-only-cards">
+                      {myProperties.map((prop) => (
+                        <div key={prop._id} className="mobile-booking-card">
+                          {/* Property Cover Banner */}
+                          <div className="mobile-booking-hero">
+                            <img
+                              src={prop.images?.[0] || 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=80'}
+                              alt={prop.title}
+                              loading="lazy"
+                            />
+                            <div className="mobile-hero-badge-left">
+                              <span className={`badge ${
+                                prop.status === 'Approved' ? 'badge-approved' :
+                                prop.status === 'Pending' ? 'badge-pending' : 'badge-rejected'
+                              }`}>
+                                {prop.status}
+                              </span>
+                            </div>
+                            <div className="mobile-hero-badge-right">
+                              <span className="badge badge-role">{prop.propertyType}</span>
+                            </div>
+                            <div className="mobile-hero-price-chip">
+                              ${prop.rentPrice?.toLocaleString()}/{prop.rentType?.toLowerCase()}
+                            </div>
+                          </div>
+
+                          {/* Property Card Body */}
+                          <div className="mobile-booking-body">
+                            <div>
+                              <h4 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: '0.3rem', lineHeight: 1.35 }}>
+                                {prop.title}
+                              </h4>
+                              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                <MapPin size={14} /> {prop.location}
+                              </span>
+                            </div>
+
+                            {/* Rejection Alert if Rejected */}
+                            {prop.status === 'Rejected' && (
+                              <div className="mobile-rejection-alert">
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--danger)', fontWeight: 700, fontSize: '0.85rem' }}>
+                                  <AlertTriangle size={16} />
+                                  <span>Listing Rejected by Admin</span>
+                                </div>
+                                <button
+                                  onClick={() => {
+                                    setSelectedRejectedProperty(prop);
+                                    setFeedbackModalOpen(true);
+                                  }}
+                                  className="btn btn-danger btn-sm"
+                                  style={{ width: '100%', gap: '0.4rem', justifyContent: 'center' }}
+                                >
+                                  <Eye size={15} />
+                                  <span>View Rejection Feedback</span>
+                                </button>
                               </div>
-                            </td>
-                            <td>
+                            )}
+
+                            {/* Action Buttons */}
+                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
+                              <Link
+                                to={`/properties/${prop._id}`}
+                                className="btn btn-secondary btn-sm"
+                                style={{ flex: 1, justifyContent: 'center' }}
+                              >
+                                <Eye size={15} />
+                                <span>View Listing</span>
+                              </Link>
                               <button
                                 onClick={() => handleDeleteProperty(prop._id)}
                                 className="btn btn-danger btn-sm"
-                                title="Delete Property"
+                                style={{ flex: 1, justifyContent: 'center' }}
                               >
                                 <Trash2 size={15} />
+                                <span>Delete</span>
                               </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
                 )}
               </div>
             )}
 
             {/* 3. Add Property Tab */}
             {activeTab === 'add' && (
-              <div style={{
-                background: 'var(--bg-card)',
-                border: '1px solid var(--border-color)',
-                borderRadius: 'var(--radius-lg)',
-                padding: '2.5rem',
-              }}>
+              <div className="dashboard-form-card">
                 <h2 style={{ fontSize: '1.4rem', marginBottom: '1.5rem' }}>Create New Property Listing</h2>
 
                 {formSuccess && (
@@ -708,70 +813,139 @@ const OwnerDashboard = () => {
                     </p>
                   </div>
                 ) : (
-                  <div className="table-container">
-                    <table className="custom-table">
-                      <thead>
-                        <tr>
-                          <th>Tenant Information</th>
-                          <th>Property</th>
-                          <th>Move-in Date</th>
-                          <th>Amount</th>
-                          <th>Status</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {bookingRequests.map((req) => (
-                          <tr key={req._id}>
-                            <td>
-                              <div>
-                                <strong>{req.tenantName}</strong>
-                                <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)' }}>{req.tenantEmail}</span>
-                                <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Tel: {req.contactNumber}</span>
-                              </div>
-                            </td>
-                            <td>
-                              <strong>{req.propertyName}</strong>
-                            </td>
-                            <td>{new Date(req.moveInDate).toLocaleDateString()}</td>
-                            <td><strong>${req.amountPaid?.toLocaleString()}</strong></td>
-                            <td>
-                              <span className={`badge ${
-                                req.bookingStatus === 'Approved' ? 'badge-approved' :
-                                req.bookingStatus === 'Pending' ? 'badge-pending' : 'badge-rejected'
-                              }`}>
-                                {req.bookingStatus}
-                              </span>
-                            </td>
-                            <td>
-                              {req.bookingStatus === 'Pending' ? (
-                                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                  <button
-                                    onClick={() => handleBookingAction(req._id, 'Approved')}
-                                    className="btn btn-primary btn-sm"
-                                    title="Approve Booking"
-                                  >
-                                    <Check size={16} />
-                                    <span>Approve</span>
-                                  </button>
-                                  <button
-                                    onClick={() => handleBookingAction(req._id, 'Rejected')}
-                                    className="btn btn-danger btn-sm"
-                                    title="Reject Booking"
-                                  >
-                                    <X size={16} />
-                                    <span>Reject</span>
-                                  </button>
-                                </div>
-                              ) : (
-                                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Resolved</span>
-                              )}
-                            </td>
+                  <>
+                    {/* Desktop Table View */}
+                    <div className="table-container desktop-only-table">
+                      <table className="custom-table" style={{ minWidth: '780px' }}>
+                        <thead>
+                          <tr>
+                            <th style={{ minWidth: '220px' }}>Tenant Information</th>
+                            <th style={{ minWidth: '180px' }}>Property</th>
+                            <th style={{ minWidth: '120px' }}>Move-in Date</th>
+                            <th style={{ minWidth: '110px' }}>Amount</th>
+                            <th style={{ minWidth: '120px' }}>Status</th>
+                            <th style={{ minWidth: '160px', textAlign: 'center' }}>Actions</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                        </thead>
+                        <tbody>
+                          {bookingRequests.map((req) => (
+                            <tr key={req._id}>
+                              <td>
+                                <div>
+                                  <strong style={{ display: 'block' }}>{req.tenantName}</strong>
+                                  <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)' }}>{req.tenantEmail}</span>
+                                  <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Tel: {req.contactNumber}</span>
+                                </div>
+                              </td>
+                              <td>
+                                <strong>{req.propertyName}</strong>
+                              </td>
+                              <td style={{ whiteSpace: 'nowrap' }}>{new Date(req.moveInDate).toLocaleDateString()}</td>
+                              <td style={{ whiteSpace: 'nowrap' }}><strong style={{ color: 'var(--accent-primary)' }}>${req.amountPaid?.toLocaleString()}</strong></td>
+                              <td>
+                                <span className={`badge ${
+                                  req.bookingStatus === 'Approved' ? 'badge-approved' :
+                                  req.bookingStatus === 'Pending' ? 'badge-pending' : 'badge-rejected'
+                                }`}>
+                                  {req.bookingStatus}
+                                </span>
+                              </td>
+                              <td style={{ textAlign: 'center' }}>
+                                {req.bookingStatus === 'Pending' ? (
+                                  <div style={{ display: 'inline-flex', gap: '0.5rem' }}>
+                                    <button
+                                      onClick={() => handleBookingAction(req._id, 'Approved')}
+                                      className="btn btn-primary btn-sm"
+                                      title="Approve Booking"
+                                    >
+                                      <Check size={16} />
+                                      <span>Approve</span>
+                                    </button>
+                                    <button
+                                      onClick={() => handleBookingAction(req._id, 'Rejected')}
+                                      className="btn btn-danger btn-sm"
+                                      title="Reject Booking"
+                                    >
+                                      <X size={16} />
+                                      <span>Reject</span>
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Resolved</span>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Mobile Cards View */}
+                    <div className="mobile-only-cards">
+                      {bookingRequests.map((req) => (
+                        <div key={req._id} className="mobile-favorite-card">
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
+                            <div>
+                              <h4 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: '0.2rem' }}>{req.tenantName}</h4>
+                              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>{req.tenantEmail}</span>
+                            </div>
+                            <span className={`badge ${
+                              req.bookingStatus === 'Approved' ? 'badge-approved' :
+                              req.bookingStatus === 'Pending' ? 'badge-pending' : 'badge-rejected'
+                            }`}>
+                              {req.bookingStatus}
+                            </span>
+                          </div>
+
+                          <div className="mobile-booking-info-box">
+                            <div className="mobile-booking-info-item">
+                              <span className="info-item-label">Property</span>
+                              <span className="info-item-value" style={{ fontSize: '0.85rem' }}>{req.propertyName}</span>
+                            </div>
+                            <div className="mobile-booking-info-item">
+                              <span className="info-item-label">Move-In Date</span>
+                              <span className="info-item-value">{new Date(req.moveInDate).toLocaleDateString()}</span>
+                            </div>
+                            <div className="mobile-booking-info-item">
+                              <span className="info-item-label">Amount Paid</span>
+                              <span className="info-item-value" style={{ color: 'var(--accent-primary)' }}>${req.amountPaid?.toLocaleString()}</span>
+                            </div>
+                            <div className="mobile-booking-info-item">
+                              <span className="info-item-label">Contact Tel</span>
+                              <a href={`tel:${req.contactNumber}`} className="info-item-value" style={{ color: 'var(--accent-primary)', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                <Phone size={12} /> {req.contactNumber}
+                              </a>
+                            </div>
+                          </div>
+
+                          {req.bookingStatus === 'Pending' ? (
+                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
+                              <button
+                                onClick={() => handleBookingAction(req._id, 'Approved')}
+                                className="btn btn-primary btn-sm"
+                                style={{ flex: 1, justifyContent: 'center', padding: '0.65rem' }}
+                              >
+                                <Check size={16} />
+                                <span>Approve</span>
+                              </button>
+                              <button
+                                onClick={() => handleBookingAction(req._id, 'Rejected')}
+                                className="btn btn-danger btn-sm"
+                                style={{ flex: 1, justifyContent: 'center', padding: '0.65rem' }}
+                              >
+                                <X size={16} />
+                                <span>Reject</span>
+                              </button>
+                            </div>
+                          ) : (
+                            <div style={{ textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-muted)', paddingTop: '0.25rem' }}>
+                              Booking request resolved as <strong>{req.bookingStatus}</strong>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </>
                 )}
               </div>
             )}
