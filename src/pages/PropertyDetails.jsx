@@ -516,17 +516,54 @@ const PropertyDetails = () => {
                   </div>
                 </div>
 
-                <button
-                  onClick={() => setBookingModalOpen(true)}
-                  className="btn btn-primary btn-lg"
-                  style={{ width: '100%', marginBottom: '1rem' }}
-                >
-                  Book Property Now
-                </button>
+                {user?.role === 'Owner' ? (
+                  <div style={{
+                    background: 'rgba(239, 68, 68, 0.08)',
+                    border: '1px solid rgba(239, 68, 68, 0.25)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '1.25rem 1rem',
+                    marginBottom: '1rem',
+                    textAlign: 'center',
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.5rem',
+                      color: 'var(--danger)',
+                      fontWeight: 600,
+                      fontSize: '0.95rem',
+                      marginBottom: '0.35rem',
+                    }}>
+                      <AlertCircle size={18} />
+                      <span>Owner Account</span>
+                    </div>
+                    <p style={{ fontSize: '0.825rem', color: 'var(--text-secondary)', marginBottom: '0.85rem', lineHeight: 1.45 }}>
+                      Property owners cannot book properties. Please log in with a Tenant account to reserve rentals.
+                    </p>
+                    <button
+                      onClick={() => navigate('/dashboard/owner')}
+                      className="btn btn-secondary btn-sm"
+                      style={{ width: '100%', fontSize: '0.85rem' }}
+                    >
+                      Go to Owner Dashboard
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => setBookingModalOpen(true)}
+                      className="btn btn-primary btn-lg"
+                      style={{ width: '100%', marginBottom: '1rem' }}
+                    >
+                      Book Property Now
+                    </button>
 
-                <p style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                  Reservation deposit processed securely via Stripe.
-                </p>
+                    <p style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                      Reservation deposit processed securely via Stripe.
+                    </p>
+                  </>
+                )}
               </div>
 
               {/* Owner Info Card */}

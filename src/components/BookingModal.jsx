@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { X, Calendar, Phone, FileText, DollarSign, ShieldCheck } from 'lucide-react';
+import { X, Calendar, Phone, FileText, DollarSign, ShieldCheck, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const BookingModal = ({ property, isOpen, onClose, onProceedToPayment }) => {
   const { user } = useAuth();
+  const isOwner = user?.role === 'Owner';
   const [formData, setFormData] = useState({
     moveInDate: '',
     contactNumber: '',
@@ -15,6 +16,10 @@ const BookingModal = ({ property, isOpen, onClose, onProceedToPayment }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (isOwner) {
+      setError('Property owners are not permitted to submit rental bookings. Please log in with a Tenant account.');
+      return;
+    }
     if (!formData.moveInDate || !formData.contactNumber) {
       setError('Please provide your move-in date and contact telephone number.');
       return;
@@ -139,8 +144,36 @@ const BookingModal = ({ property, isOpen, onClose, onProceedToPayment }) => {
             </div>
           </div>
 
-          <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.85rem' }}>
-            Confirm & Proceed to Payment
+          {isOwner && (
+            <div style={{
+              background: 'rgba(239, 68, 68, 0.1)',
+              color: 'var(--danger)',
+              border: '1px solid rgba(239, 68, 68, 0.25)',
+              padding: '0.75rem 1rem',
+              borderRadius: 'var(--radius-md)',
+              marginBottom: '1rem',
+              fontSize: '0.85rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+            }}>
+              <AlertCircle size={18} style={{ flexShrink: 0 }} />
+              <span>Property owners cannot book properties. Please log in with a Tenant account.</span>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={isOwner}
+            className="btn btn-primary"
+            style={{
+              width: '100%',
+              padding: '0.85rem',
+              opacity: isOwner ? 0.6 : 1,
+              cursor: isOwner ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {isOwner ? 'Owners Cannot Book' : 'Confirm & Proceed to Payment'}
           </button>
         </form>
       </div>
