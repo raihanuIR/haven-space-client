@@ -86,7 +86,7 @@ const Navbar = () => {
                 </span>
                 <span className="badge badge-role user-nav-badge">{user?.role}</span>
               </Link>
-              <button onClick={handleLogout} className="btn btn-secondary btn-sm" title="Logout">
+              <button onClick={handleLogout} className="btn btn-secondary btn-sm nav-logout-desktop" title="Logout">
                 <LogOut size={16} />
                 <span className="user-nav-btn-text">Logout</span>
               </button>
@@ -131,7 +131,18 @@ const Navbar = () => {
             <>
               <Link to={getDashboardPath()} onClick={() => setMobileOpen(false)} className="nav-link">Dashboard ({user?.role})</Link>
               <Link to="/dashboard/profile" onClick={() => setMobileOpen(false)} className="nav-link">My Profile</Link>
-              <button onClick={handleLogout} className="btn btn-danger btn-sm" style={{ width: 'fit-content' }}>
+              <button
+                onClick={handleLogout}
+                className="btn btn-danger btn-sm"
+                style={{
+                  width: 'fit-content',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.65rem 1.25rem',
+                  marginTop: '0.25rem'
+                }}
+              >
                 <LogOut size={16} /> Logout
               </button>
             </>

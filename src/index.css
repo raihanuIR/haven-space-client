@@ -1417,6 +1417,9 @@ button, input, select, textarea {
   .nav-auth-desktop {
     display: none;
   }
+  .nav-logout-desktop {
+    display: none !important;
+  }
   .mobile-toggle {
     display: block;
   }
