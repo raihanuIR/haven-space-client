@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { LogIn, Mail, Lock, AlertCircle, Building2, UserCheck } from 'lucide-react';
+import { LogIn, Mail, Lock, AlertCircle, Building2, UserCheck, ShieldCheck, User, Zap } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
@@ -35,6 +35,37 @@ const Login = () => {
     setLoading(false);
   };
 
+  const handleDemoLogin = async (demoRole) => {
+    let demoEmail = '';
+    let demoPass = '';
+
+    if (demoRole === 'Admin') {
+      demoEmail = 'admin@rentalhub.com';
+      demoPass = 'AdminPassword123!';
+    } else if (demoRole === 'Owner') {
+      demoEmail = 'owner@rentalhub.com';
+      demoPass = 'OwnerPassword123!';
+    } else {
+      // User / Tenant
+      demoEmail = 'tenant@rentalhub.com';
+      demoPass = 'TenantPassword123!';
+    }
+
+    setEmail(demoEmail);
+    setPassword(demoPass);
+    setError('');
+    setLoading(true);
+
+    const res = await login(demoEmail, demoPass);
+    if (res.success) {
+      const target = demoRole === 'Admin' ? '/dashboard/admin' : demoRole === 'Owner' ? '/dashboard/owner' : '/dashboard/tenant';
+      navigate(target, { replace: true });
+    } else {
+      setError(res.message);
+    }
+    setLoading(false);
+  };
+
   const handleGoogleLogin = async () => {
     setError('');
     setLoading(true);
@@ -58,12 +89,63 @@ const Login = () => {
         padding: 'clamp(1.25rem, 5vw, 2.5rem)',
         boxShadow: 'var(--shadow-xl)',
       }}>
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
           <div className="nav-brand-icon" style={{ margin: '0 auto 1rem auto', width: '48px', height: '48px' }}>
             <Building2 size={26} />
           </div>
-          <h2 style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>Welcome Back</h2>
+          <h2 style={{ fontSize: '1.8rem', marginBottom: '0.4rem' }}>Welcome Back</h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Sign in to manage your bookings and rental listings</p>
+        </div>
+
+        {/* 1-Click Demo Logins Banner per Remontada Specification */}
+        <div style={{
+          backgroundColor: 'var(--bg-tertiary)',
+          border: '1px solid var(--border-color)',
+          borderRadius: 'var(--radius-md)',
+          padding: '1rem',
+          marginBottom: '1.75rem',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', fontWeight: 700, color: 'var(--accent-primary)', marginBottom: '0.75rem' }}>
+            <Zap size={15} />
+            <span>ONE-CLICK DEMO LOGIN (AUTO-FILL)</span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
+            <button
+              type="button"
+              disabled={loading}
+              onClick={() => handleDemoLogin('User')}
+              className="btn btn-secondary btn-sm"
+              style={{ fontSize: '0.78rem', padding: '0.45rem 0.25rem', flexDirection: 'column', gap: '0.2rem' }}
+              title="Sign in as Demo User/Tenant"
+            >
+              <User size={14} color="var(--accent-primary)" />
+              <span>Demo User</span>
+            </button>
+
+            <button
+              type="button"
+              disabled={loading}
+              onClick={() => handleDemoLogin('Admin')}
+              className="btn btn-secondary btn-sm"
+              style={{ fontSize: '0.78rem', padding: '0.45rem 0.25rem', flexDirection: 'column', gap: '0.2rem' }}
+              title="Sign in as Super Admin"
+            >
+              <ShieldCheck size={14} color="var(--danger)" />
+              <span>Demo Admin</span>
+            </button>
+
+            <button
+              type="button"
+              disabled={loading}
+              onClick={() => handleDemoLogin('Owner')}
+              className="btn btn-secondary btn-sm"
+              style={{ fontSize: '0.78rem', padding: '0.45rem 0.25rem', flexDirection: 'column', gap: '0.2rem' }}
+              title="Sign in as Property Owner"
+            >
+              <Building2 size={14} color="var(--success)" />
+              <span>Demo Owner</span>
+            </button>
+          </div>
         </div>
 
         {error && (

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { MapPin, Bed, Bath, Maximize2, Share2, Heart } from 'lucide-react';
+import { MapPin, Bed, Bath, Maximize2, Share2, Heart, Star } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const PropertyCard = ({ property, onShare, onToggleFavorite, isFavorite = false }) => {
@@ -9,14 +9,8 @@ const PropertyCard = ({ property, onShare, onToggleFavorite, isFavorite = false 
   const navigate = useNavigate();
 
   const handleDetailsClick = () => {
-    // Specification Rule:
-    // If user is not logged in: View Details -> Redirect to Login
-    // If logged in: View Details -> Property Details Page
-    if (!isAuthenticated) {
-      navigate('/login', { state: { from: { pathname: `/properties/${property._id}` } } });
-    } else {
-      navigate(`/properties/${property._id}`);
-    }
+    // Remontada Rule: Details Page must be publicly accessible!
+    navigate(`/properties/${property._id}`);
   };
 
   return (
@@ -37,40 +31,61 @@ const PropertyCard = ({ property, onShare, onToggleFavorite, isFavorite = false 
           <span className="badge badge-approved">{property.propertyType}</span>
         </div>
         <div className="property-card-price">
-          ${property.rentPrice.toLocaleString()} <span style={{ fontSize: '0.75rem', fontWeight: 400 }}>/{property.rentType?.toLowerCase()}</span>
+          ${property.rentPrice?.toLocaleString()} <span style={{ fontSize: '0.75rem', fontWeight: 400 }}>/{property.rentType?.toLowerCase()}</span>
         </div>
       </div>
 
       {/* Card Content */}
       <div className="property-card-body">
-        <h3 className="property-card-title" title={property.title}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
+          <div className="property-card-location" style={{ marginBottom: 0 }}>
+            <MapPin size={14} color="var(--accent-primary)" />
+            <span>{property.location}</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '0.8rem', color: '#f59e0b', fontWeight: 600 }}>
+            <Star size={13} fill="#f59e0b" color="#f59e0b" />
+            <span>4.9</span>
+          </div>
+        </div>
+
+        <h3 className="property-card-title" title={property.title} onClick={handleDetailsClick} style={{ cursor: 'pointer' }}>
           {property.title}
         </h3>
 
-        <div className="property-card-location">
-          <MapPin size={15} color="var(--accent-primary)" />
-          <span>{property.location}</span>
-        </div>
+        {/* Short Description */}
+        <p style={{
+          fontSize: '0.85rem',
+          color: 'var(--text-muted)',
+          marginBottom: '0.85rem',
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+          lineHeight: '1.45',
+          minHeight: '2.5rem',
+        }}>
+          {property.description || 'Premium rental property equipped with modern finishes and prime location.'}
+        </p>
 
         {/* Specifications */}
         <div className="property-specs-row">
           <div className="property-spec-item" title="Bedrooms">
-            <Bed size={16} />
+            <Bed size={15} />
             <span>{property.bedrooms} Beds</span>
           </div>
           <div className="property-spec-item" title="Bathrooms">
-            <Bath size={16} />
+            <Bath size={15} />
             <span>{property.bathrooms} Baths</span>
           </div>
           <div className="property-spec-item" title="Living Area">
-            <Maximize2 size={16} />
+            <Maximize2 size={15} />
             <span>{property.propertySize} sqft</span>
           </div>
         </div>
 
         {/* Card Actions */}
         <div className="property-card-footer">
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', gap: '0.4rem' }}>
             {onShare && (
               <button
                 type="button"
@@ -79,10 +94,10 @@ const PropertyCard = ({ property, onShare, onToggleFavorite, isFavorite = false 
                   onShare(property);
                 }}
                 className="theme-toggle-btn"
-                style={{ width: '36px', height: '36px' }}
+                style={{ width: '34px', height: '34px' }}
                 title="Share Listing"
               >
-                <Share2 size={16} />
+                <Share2 size={15} />
               </button>
             )}
             {onToggleFavorite && isAuthenticated && (
@@ -94,13 +109,13 @@ const PropertyCard = ({ property, onShare, onToggleFavorite, isFavorite = false 
                 }}
                 className="theme-toggle-btn"
                 style={{
-                  width: '36px',
-                  height: '36px',
+                  width: '34px',
+                  height: '34px',
                   color: isFavorite ? 'var(--danger)' : 'var(--text-secondary)',
                 }}
                 title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
               >
-                <Heart size={16} fill={isFavorite ? 'currentColor' : 'none'} />
+                <Heart size={15} fill={isFavorite ? 'currentColor' : 'none'} />
               </button>
             )}
           </div>

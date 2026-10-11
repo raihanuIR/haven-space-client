@@ -1,159 +1,82 @@
-# 🏡 RentalHub — Property Rental & Booking Platform (Client)
+# Property Rental & Booking Platform (RentalHub) - Frontend Client
 
-[![React](https://img.shields.io/badge/React-18.3.1-61dafb?logo=react&logoColor=black)](https://reactjs.org/)
-[![Vite](https://img.shields.io/badge/Vite-5.4.2-646cff?logo=vite&logoColor=white)](https://vitejs.dev/)
-[![React Router](https://img.shields.io/badge/React_Router-6.26.1-ca4245?logo=react-router&logoColor=white)](https://reactrouter.com/)
-[![Framer Motion](https://img.shields.io/badge/Framer_Motion-11.3.31-0055ff?logo=framer&logoColor=white)](https://www.framer.com/motion/)
-[![Recharts](https://img.shields.io/badge/Recharts-2.12.7-22b5bf)](https://recharts.org/)
-[![Stripe](https://img.shields.io/badge/Stripe-Integration-635bff?logo=stripe&logoColor=white)](https://stripe.com/)
-[![Firebase](https://img.shields.io/badge/Firebase-Auth-ffca28?logo=firebase&logoColor=black)](https://firebase.google.com/)
-[![Vercel](https://img.shields.io/badge/Deployed-Vercel-000000?logo=vercel&logoColor=white)](https://haven-space-client.vercel.app/)
-
-A premier, high-converting digital rental marketplace connecting discerning tenants with verified property owners. Designed with modern aesthetics, dark/light themes, fluid micro-animations, and full multi-device responsiveness.
+An end-to-end full-stack property rental and leasing platform developed with React 18, Vite, React Router DOM 6, custom Vanilla CSS design tokens, Stripe payment gateway, and Firebase Google authentication. Fully upgraded according to the **Remontada Project Update** specifications.
 
 ---
 
 ## 🌐 Live Deployment & Repositories
 
-- **Front-End Live Application**: [https://haven-space-client.vercel.app/](https://haven-space-client.vercel.app/)
-- **Live Backend API**: [https://haven-space-server-theta.vercel.app/api](https://haven-space-server-theta.vercel.app/api)
-- **Client GitHub Repository**: [https://github.com/raihanuIR/haven-space-client](https://github.com/raihanuIR/haven-space-client)
-- **Server GitHub Repository**: [https://github.com/raihanuIR/haven-space-server](https://github.com/raihanuIR/haven-space-server)
+| Entity | Live Link / Repository |
+| :--- | :--- |
+| **Front-End Live Application** | [https://haven-space-client.vercel.app/](https://haven-space-client.vercel.app/) |
+| **Backend REST API Endpoint** | [https://haven-space-server-theta.vercel.app/api](https://haven-space-server-theta.vercel.app/api) |
+| **Client Repository (GitHub)** | [https://github.com/raihanuIR/haven-space-client](https://github.com/raihanuIR/haven-space-client) |
+| **Server Repository (GitHub)** | [https://github.com/raihanuIR/haven-space-server](https://github.com/raihanuIR/haven-space-server) |
 
 ---
 
-## 🎯 Purpose & Scope
+## 🔑 Demo Account Credentials
 
-RentalHub simplifies the end-to-end residential leasing journey. Tenants discover verified listings, make digital reservations with secure Stripe checkout, and track their lease agreements. Property owners gain automated tenant management, transparent financial earnings visualization, and effortless property publishing. Administrators maintain platform integrity through user role controls and transparent listing moderation.
+| Role | Email Address | Password | Permissions & Dashboard |
+| :--- | :--- | :--- | :--- |
+| **User / Tenant** | `tenant@rentalhub.com` | `TenantPassword123!` | Book properties, Stripe deposit payment, add favorites, view spending trends, update password |
+| **Admin** | `admin@rentalhub.com` | `AdminPassword123!` | Executive overview with Bar/Line/Pie Recharts, manage users & properties, audit inquiries & transactions |
+| **Owner** | `owner@rentalhub.com` | `OwnerPassword123!` | Publish listings, view 12-month earnings chart, download PDF, approve/reject requests |
 
----
-
-## ✨ Key Features Breakdown
-
-### 1. Authentication & Role-Based Access Control (RBAC)
-- **JWT Authentication**: Persistent session management backed by Bearer token authorization.
-- **Role Enforcement**: Distinct workflows and dashboards for `Tenant`, `Owner`, and `Admin`.
-- **Google Social Login**: Firebase Google OAuth integration automatically assigning new users to the `Tenant` role.
-- **Zero-Flicker Route Guards**: Deep state reload preservation ensures authenticated users are never booted back to the login screen on refresh.
-- **Smart Auth Redirects**: Already signed-in users navigating to `/login` or `/register` are automatically directed to their respective dashboards.
-
-### 2. Public Discovery & Catalog
-- **Banner & Hero Section**: Animated hero layout with fluid Framer Motion entrance effects and high-resolution visuals.
-- **Multi-Field Search**: Real-time filtering by Location, Property Type, Minimum Price, and Maximum Price.
-- **6 Featured Properties**: Limit-enforced backend query with guest login redirects (guests clicking "View Details" are directed to Login; authenticated users go directly to the details page).
-- **Why Choose Us & Testimonials**: Highlight benefit cards and verified customer reviews.
-- **2 Custom Sections**:
-  - *Top Rental Destinations*: Highlighting Miami, New York, Los Angeles, and Austin.
-  - *Platform Market Insights*: Real-time statistics on active leases, tenant ratings, and verified owners.
-- **All Properties Catalog**: 3-column responsive grid with backend search, type filtering, sorting (Price Low-to-High, High-to-Low, Newest), and server-side pagination.
-
-### 3. Property Details Page (Private Route)
-- **High-Res Photo Gallery**: Interactive thumbnail switcher with responsive viewport scaling.
-- **Architectural Specs**: Comprehensive breakdown of bedrooms, bathrooms, living area, and billing cycle.
-- **Amenities & Extra Features**: Badges for pool, gym, parking, pet allowance, EV charging, etc.
-- **Bookmark / Favorites**: Persisted in the database and accessible via the tenant dashboard.
-- **Stripe Checkout Simulation**: Complete reservation flow with instant payment processing, celebratory confetti, and automated audit trail generation.
-- **Ratings & Reviews**: Star-rating selector allowing tenants to publish feedback.
-
-### 4. Role Dashboards
-- **Tenant Dashboard**:
-  - *My Bookings*: Comprehensive table showing Property Image, Name, Dates, Amount Paid, Booking Status, and Payment Status.
-  - *Saved Favorites*: Bookmarked listings with quick navigation and deletion actions.
-  - *Profile Management*: Real-time profile name and avatar updates.
-- **Owner Dashboard**:
-  - *Analytics Tab*: 3 Summary KPI cards (Total Earnings, Total Properties, Total Bookings) + **Recharts 12-Month Line Chart** + **Download Earnings PDF** button.
-  - *Add Property*: Full form validating Title, Description, Location, Type, Rent, Billing Cycle, Specs, Amenities, and Image URLs (defaults to `Pending`).
-  - *My Properties*: Management table with status badges (`Pending`, `Approved`, `Rejected`), delete action, and the **👁️ view button** to inspect admin rejection feedback.
-  - *Booking Requests*: Moderation table with instant Approve and Reject controls.
-- **Admin Dashboard**:
-  - *All Users*: User roster with instant role dropdown updates (`Tenant`, `Owner`, `Admin`).
-  - *All Properties*: Approve, Reject (with mandatory feedback modal), and Delete actions.
-  - *All Bookings*: Paginated system-wide booking monitoring.
-  - *Financial Transactions*: Paginated audit trail showing Transaction ID, Property, Tenant, Owner, Amount, and Date.
-
-### 5. Challenge & Optional Requirements
-- [x] **JWT Token Middleware**: Protected private routes across all API endpoints.
-- [x] **Multi-Page Pagination**: Implemented on All Properties, Admin Bookings, and Admin Transactions.
-- [x] **Backend Search & Filtering**: All queries executed on the MongoDB / Express backend.
-- [x] **Owner Rejection Feedback View (👁️)**: Owners inspect admin feedback directly from their property table.
-- [x] **Download Monthly Earnings Report (PDF)**: Built with `jspdf` and `jspdf-autotable`.
-- [x] **Dark / Light Theme Toggle**: Persistent theme switcher for optimal day and night viewing.
-- [x] **Share Property**: Copy-link button + direct sharing to X (Twitter), WhatsApp, and LinkedIn.
-- [x] **Rebranded X Logo**: Implemented in Footer and Share dialogs.
-- [x] **Full Device Responsiveness**: Fluid layouts supporting Mobile ($\le 480\text{px}$, $\le 640\text{px}$), Tablet ($\le 768\text{px}$, $\le 1024\text{px}$), and Desktop.
+> **Note:** The login page (`/login`) includes **1-Click Auto-Fill Demo Login buttons** for instant, frictionless sign-in for Demo User, Demo Admin, and Demo Owner.
 
 ---
 
-## 📱 Responsive Design System
+## 🏆 Remontada Upgrade Specifications Checklist
 
-The application features a responsive design architecture:
-- **Extra Small Mobile ($\le 480\text{px}$)**: Fluid containers with `clamp()` paddings, single-column forms, touch-friendly tap targets, and condensed specs cards.
-- **Mobile ($\le 640\text{px}$)**: Collapsible navbar with slide-down drawer, stacked search inputs, auto-wrapping footer, and horizontal touch-scrollable data tables.
-- **Tablet ($\le 768\text{px}$ / $\le 1024\text{px}$)**: 2-column property catalogs, stacked property details view, and dashboard sidebar transforming into a horizontal scrollable tab strip.
-- **Desktop ($> 1024\text{px}$)**: Expansive multi-column layouts, sticky booking sidebar, and wide data presentation tables.
-
----
-
-## 📦 NPM Packages Used
-
-| Package | Version | Purpose |
-| :--- | :--- | :--- |
-| `react` & `react-dom` | `^18.3.1` | Core declarative user interface library. |
-| `vite` | `^5.4.2` | Fast build tool and development server. |
-| `react-router-dom` | `^6.26.1` | Client-side routing, query parameter handling, and private route guards. |
-| `framer-motion` | `^11.3.31` | Smooth entrance animations and card hover transitions. |
-| `recharts` | `^2.12.7` | Responsive 12-month earnings trendline visualization. |
-| `lucide-react` | `^0.439.0` | Crisp, modern iconography. |
-| `axios` | `^1.7.7` | HTTP client with automatic Bearer token injection. |
-| `canvas-confetti` | `^1.9.3` | Celebratory visual feedback on completed reservations. |
-| `jspdf` & `jspdf-autotable` | `^2.5.1` / `^3.8.3` | Client-side PDF generation for monthly earnings reports. |
-| `firebase` | `^10.13.1` | Google OAuth social login provider. |
-| `@stripe/stripe-js` | `^4.4.0` | Secure Stripe payment workflow integration. |
-
----
-
-## 🛠️ Environment Configuration
-
-Create a `.env` file inside the `client/` root directory:
-
-```env
-# Backend API Base URL
-VITE_API_URL=https://haven-space-server-theta.vercel.app/api
-
-# Stripe Publishable Key
-VITE_STRIPE_PUBLIC_KEY=pk_test_51MockPublicKeyForRentalHubPlatform
-
-# Firebase Authentication Config
-VITE_FIREBASE_API_KEY=AIzaSyCktchvQqak0cPn9ZMhxmxdEtnV2O6hnK8
-VITE_FIREBASE_AUTH_DOMAIN=haven-space-ed64d.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=haven-space-ed64d
-VITE_FIREBASE_STORAGE_BUCKET=haven-space-ed64d.firebasestorage.app
-VITE_FIREBASE_MESSAGING_SENDER_ID=99907910586
-VITE_FIREBASE_APP_ID=1:99907910586:web:0beeb3e7f055c646c87b83
-```
+- [x] **Global UI & Design System**: 4px/8px spacing grid, unified border-radius (`var(--radius-lg)`), light & dark mode theme switcher with high-contrast palette.
+- [x] **Reusable UI Component Suite**: Dedicated reusable components created in `src/components/ui/` (`Button`, `Input`, `Card`, `Badge`, `Modal`, `Table`, `Dropdown`, `SkeletonCard`).
+- [x] **Navbar Navigation & Profile Dropdown**:
+  - Logged-out navigation: 5 routes (`Home`, `Explore`, `About`, `Blog`, `Contact`) + Auth buttons.
+  - Logged-in navigation: 6 routes (`Home`, `Explore`, `Dashboard`, `About`, `Blog`, `Contact`) + Interactive Profile dropdown menu (with name, role badge, dashboard, profile, settings, and sign-out).
+  - Responsive hamburger drawer navigation on mobile.
+- [x] **Landing / Home Page (9 Meaningful Sections)**:
+  1. *Hero Section*: Viewport height bounded to 65vh with multi-criteria search and interactive escrow counter.
+  2. *Dynamic Platform Statistics*: Live metrics fetched from backend (`/api/properties/stats/summary`).
+  3. *Featured Properties*: 4-column responsive desktop grid with animated `SkeletonCard` loading states.
+  4. *Property Architecture & Typology*: Apartments, Luxury Villas, Penthouses, Urban Studios with direct catalog filters.
+  5. *Core Trust Features*: Identity verification, instant escrow, transparent pricing, authentic reviews.
+  6. *How It Works*: Dual interactive tabs for Tenants and Property Owners.
+  7. *Top Metropolitan Destinations*: Miami, Austin, San Francisco, New York.
+  8. *Customer Reviews & Ratings*: Authentic star testimonials fetched from backend.
+  9. *FAQ Accordion & Newsletter Digest*: Interactive collapsible questions with zero placeholder text.
+- [x] **Core Listing & 4-Column Grid**: Desktop grid configured to 4 cards per row (`repeat(4, 1fr)`), featuring cover image, title, short description snippet, specifications, rating, and "View Details".
+- [x] **Public Details Page**: `/properties/:id` is publicly accessible without requiring login. Features multi-image gallery, specs, reviews, and a **Related Properties** recommendation carousel.
+- [x] **Authentication & 1-Click Demo Login**: JWT authentication, bcrypt password hashing, token expiration, and 1-click Demo buttons on `/login`.
+- [x] **Role-Based User Dashboard (4 Menu Items)**:
+  - *Overview*: Dynamic stats cards and Recharts lease spending trend area chart.
+  - *My Bookings*: Filterable reservation table with move-in dates, status badges, and details links.
+  - *My Favorites*: Bookmarked property management with remove action.
+  - *Settings*: Profile editing and embedded password update.
+- [x] **Role-Based Admin Dashboard (7 Menu Items & 3 Recharts)**:
+  - *Overview*: 4 dynamic metrics cards + 3 Recharts (Bar, Line, Pie charts).
+  - *Manage Users*: Directory with role selector (Tenant / Owner / Admin) and search.
+  - *Manage Items*: Property moderation (Approve, Reject with Feedback modal, Delete, View).
+  - *Reports*: Audited bookings and financial transactions tables with pagination.
+  - *Categories*: Typology breakdown and counts.
+  - *Inquiries*: Customer contact message management with status toggle (Unread, Read, Replied).
+  - *Settings*: System configuration (Stripe mode, auto-moderation, fee percent).
+- [x] **Additional Informational Pages**:
+  - `/about`: Platform mission, architectural standards, milestones, and team.
+  - `/contact`: Interactive form connected to MongoDB database (`POST /api/contact`) with validation and instant alerts.
+  - `/blog`: Rental market journal with category filters and guides.
+  - `/terms`: Legal terms of service and privacy framework.
+- [x] **Profile Password Update**: Form in `/dashboard/profile` connected to `PUT /api/auth/change-password`.
 
 ---
 
-## 💻 Local Setup & Development
+## 🛠️ Technology Stack
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/raihanuIR/haven-space-client.git
-   cd haven-space-client
-   ```
-
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-
-3. **Start the Vite development server**:
-   ```bash
-   npm run dev
-   ```
-   Open `http://localhost:5173` in your browser.
-
-4. **Build for production**:
-   ```bash
-   npm run build
-   ```
+- **Core**: React 18, Vite, React Router DOM 6
+- **Styling**: Vanilla CSS, Custom Design System Tokens, CSS Grid & Flexbox, Glassmorphism
+- **Animations**: Framer Motion, Canvas Confetti
+- **Data & APIs**: Axios with Bearer token interceptor
+- **Payments**: `@stripe/stripe-js`, `@stripe/react-stripe-js`
+- **Auth**: Firebase Google Authentication, JWT sessions
+- **Reporting & Charts**: Recharts, jsPDF, jspdf-autotable
+- **Icons**: Lucide React

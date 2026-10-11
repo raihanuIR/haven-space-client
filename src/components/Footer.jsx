@@ -125,9 +125,9 @@ const Footer = () => {
         <div className="footer-bottom">
           <p>&copy; {new Date().getFullYear()} RentalHub Marketplace Inc. All rights reserved.</p>
           <div style={{ display: 'flex', gap: '1.5rem' }}>
-            <a href="#privacy" style={{ color: 'var(--text-muted)' }}>Privacy Policy</a>
-            <a href="#terms" style={{ color: 'var(--text-muted)' }}>Terms of Service</a>
-            <a href="#cookies" style={{ color: 'var(--text-muted)' }}>Security</a>
+            <Link to="/terms" style={{ color: 'var(--text-muted)' }}>Privacy Policy</Link>
+            <Link to="/terms" style={{ color: 'var(--text-muted)' }}>Terms of Service</Link>
+            <Link to="/about" style={{ color: 'var(--text-muted)' }}>Security & Verification</Link>
           </div>
         </div>
       </div>

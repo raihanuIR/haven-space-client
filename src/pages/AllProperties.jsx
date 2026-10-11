@@ -4,6 +4,7 @@ import { Search, Filter, ArrowUpDown, ChevronLeft, ChevronRight, SlidersHorizont
 import API from '../services/api';
 import PropertyCard from '../components/PropertyCard';
 import ShareModal from '../components/ShareModal';
+import SkeletonCard from '../components/ui/SkeletonCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const AllProperties = () => {
@@ -40,7 +41,7 @@ const AllProperties = () => {
         if (maxPriceParam) query.set('maxPrice', maxPriceParam);
         if (sortParam) query.set('sort', sortParam);
         query.set('page', page.toString());
-        query.set('limit', '6'); // 6 per page (3-column grid x 2 rows)
+        query.set('limit', '8'); // 8 per page (4-column grid x 2 rows)
 
         const { data } = await API.get(`/properties?${query.toString()}`);
         if (data.success) {
@@ -200,9 +201,13 @@ const AllProperties = () => {
           )}
         </div>
 
-        {/* 3-Column Grid Layout */}
+        {/* 4-Column Grid Layout */}
         {loading ? (
-          <LoadingSpinner text="Searching available properties..." />
+          <div className="properties-grid">
+            {[...Array(8)].map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
         ) : properties.length === 0 ? (
           <div style={{
             textAlign: 'center',

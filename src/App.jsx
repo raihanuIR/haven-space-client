@@ -18,6 +18,10 @@ import TenantDashboard from './pages/TenantDashboard';
 import OwnerDashboard from './pages/OwnerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import Profile from './pages/Profile';
+import About from './pages/About';
+import Contact from './pages/Contact';
+import Blog from './pages/Blog';
+import Terms from './pages/Terms';
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -33,24 +37,29 @@ function App() {
                 {/* Public Routes */}
                 <Route path="/" element={<Home />} />
                 <Route path="/properties" element={<AllProperties />} />
+                {/* Property Details: Publicly Accessible per Remontada Specification */}
+                <Route path="/properties/:id" element={<PropertyDetails />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy" element={<Terms />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-
-                {/* Property Details (Private Route per assignment specifications) */}
-                <Route
-                  path="/properties/:id"
-                  element={
-                    <PrivateRoute>
-                      <PropertyDetails />
-                    </PrivateRoute>
-                  }
-                />
 
                 {/* Dashboards (Role-Based Protected Routes) */}
                 <Route
                   path="/dashboard/tenant"
                   element={
-                    <PrivateRoute allowedRoles={['Tenant', 'Admin']}>
+                    <PrivateRoute allowedRoles={['Tenant', 'User', 'Admin']}>
+                      <TenantDashboard />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/dashboard/user"
+                  element={
+                    <PrivateRoute allowedRoles={['Tenant', 'User', 'Admin']}>
                       <TenantDashboard />
                     </PrivateRoute>
                   }

@@ -23,6 +23,7 @@ import { useAuth } from '../context/AuthContext';
 import BookingModal from '../components/BookingModal';
 import StripePaymentModal from '../components/StripePaymentModal';
 import ShareModal from '../components/ShareModal';
+import PropertyCard from '../components/PropertyCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const PropertyDetails = () => {
@@ -35,6 +36,7 @@ const PropertyDetails = () => {
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [favLoading, setFavLoading] = useState(false);
+  const [relatedProperties, setRelatedProperties] = useState([]);
 
   // Modals
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
@@ -82,14 +84,20 @@ const PropertyDetails = () => {
         return;
       }
 
-      // Step 2: Fetch secondary reviews & favorites non-blocking so they NEVER crash the property view
+      // Step 2: Fetch secondary reviews, related properties & favorites non-blocking
       try {
-        const reviewRes = await API.get(`/reviews/property/${rawId}`);
+        const [reviewRes, relRes] = await Promise.all([
+          API.get(`/reviews/property/${rawId}`),
+          API.get(`/properties/${rawId}/related`),
+        ]);
         if (reviewRes.data?.success && Array.isArray(reviewRes.data.reviews)) {
           setReviews(reviewRes.data.reviews);
         }
+        if (relRes.data?.success && Array.isArray(relRes.data.properties)) {
+          setRelatedProperties(relRes.data.properties);
+        }
       } catch (revErr) {
-        console.warn('[PropertyDetails] Non-blocking review fetch warning:', revErr.message);
+        console.warn('[PropertyDetails] Non-blocking secondary fetch warning:', revErr.message);
       }
 
       if (isAuthenticated) {
@@ -552,7 +560,13 @@ const PropertyDetails = () => {
                 ) : (
                   <>
                     <button
-                      onClick={() => setBookingModalOpen(true)}
+                      onClick={() => {
+                        if (!isAuthenticated) {
+                          navigate('/login', { state: { from: { pathname: `/properties/${property._id}` } } });
+                        } else {
+                          setBookingModalOpen(true);
+                        }
+                      }}
                       className="btn btn-primary btn-lg"
                       style={{ width: '100%', marginBottom: '1rem' }}
                     >
@@ -605,6 +619,28 @@ const PropertyDetails = () => {
           </div>
         </div>
       </div>
+
+      {/* Related Properties Section (Remontada Specification) */}
+      {relatedProperties.length > 0 && (
+        <section style={{ padding: '4rem 0 1rem 0', borderTop: '1px solid var(--border-color)', marginTop: '4rem' }}>
+          <div className="container">
+            <div className="section-header" style={{ marginBottom: '2.5rem' }}>
+              <span className="badge badge-approved" style={{ marginBottom: '0.5rem' }}>Similar Portfolios</span>
+              <h2 className="section-title">Related Verified Residences</h2>
+              <p className="section-subtitle">More homes in this category you might be interested in reserving.</p>
+            </div>
+            <div className="properties-grid">
+              {relatedProperties.map((rel) => (
+                <PropertyCard
+                  key={rel._id}
+                  property={rel}
+                  onShare={(p) => setShareProperty(p)}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Booking Modal */}
       <BookingModal
