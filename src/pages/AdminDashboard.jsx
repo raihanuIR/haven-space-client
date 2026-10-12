@@ -23,6 +23,7 @@ import {
   TrendingUp,
   Tag,
   Eye,
+  Edit,
 } from 'lucide-react';
 import {
   BarChart,
@@ -41,6 +42,7 @@ import {
 } from 'recharts';
 import API from '../services/api';
 import RejectionFeedbackModal from '../components/RejectionFeedbackModal';
+import EditPropertyModal from '../components/EditPropertyModal';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const COLORS = ['#4f46e5', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
@@ -61,10 +63,16 @@ const AdminDashboard = () => {
   const [inquiries, setInquiries] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Search & filter states
+  // Search, filter & sorting states
   const [userSearch, setUserSearch] = useState('');
+  const [userRoleFilter, setUserRoleFilter] = useState('All');
+  const [userSort, setUserSort] = useState('name');
+  const [userPage, setUserPage] = useState(1);
+
   const [propertySearch, setPropertySearch] = useState('');
   const [propertyFilter, setPropertyFilter] = useState('All');
+  const [propertySort, setPropertySort] = useState('newest');
+  const [propertyPage, setPropertyPage] = useState(1);
 
   // Pagination for Bookings and Transactions
   const [bookingPage, setBookingPage] = useState(1);
@@ -75,6 +83,8 @@ const AdminDashboard = () => {
   // Moderation state
   const [moderatingProperty, setModeratingProperty] = useState(null);
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [editingProperty, setEditingProperty] = useState(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
   // Platform Settings State
   const [platformSettings, setPlatformSettings] = useState({
@@ -232,18 +242,39 @@ const AdminDashboard = () => {
         { name: 'Studio', value: 2 },
       ];
 
-  // Filters
-  const filteredUsers = users.filter((u) =>
-    u.name?.toLowerCase().includes(userSearch.toLowerCase()) ||
-    u.email?.toLowerCase().includes(userSearch.toLowerCase())
-  );
+  // Filters & Sorting for Users
+  const filteredUsers = users.filter((u) => {
+    const matchesSearch = u.name?.toLowerCase().includes(userSearch.toLowerCase()) ||
+      u.email?.toLowerCase().includes(userSearch.toLowerCase());
+    const matchesRole = userRoleFilter === 'All' ? true : u.role === userRoleFilter;
+    return matchesSearch && matchesRole;
+  }).sort((a, b) => {
+    if (userSort === 'role') return (a.role || '').localeCompare(b.role || '');
+    if (userSort === 'email') return (a.email || '').localeCompare(b.email || '');
+    return (a.name || '').localeCompare(b.name || '');
+  });
 
+  const userPageSize = 6;
+  const totalUserPages = Math.ceil(filteredUsers.length / userPageSize) || 1;
+  const paginatedUsers = filteredUsers.slice((userPage - 1) * userPageSize, userPage * userPageSize);
+
+  // Filters & Sorting for Properties
   const filteredProperties = properties.filter((p) => {
     const matchesSearch = p.title?.toLowerCase().includes(propertySearch.toLowerCase()) ||
       p.location?.toLowerCase().includes(propertySearch.toLowerCase());
     const matchesStatus = propertyFilter === 'All' ? true : p.status === propertyFilter;
     return matchesSearch && matchesStatus;
+  }).sort((a, b) => {
+    if (propertySort === 'price-low') return (a.rentPrice || 0) - (b.rentPrice || 0);
+    if (propertySort === 'price-high') return (b.rentPrice || 0) - (a.rentPrice || 0);
+    if (propertySort === 'status') return (a.status || '').localeCompare(b.status || '');
+    if (propertySort === 'title') return (a.title || '').localeCompare(b.title || '');
+    return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
   });
+
+  const propertyPageSize = 6;
+  const totalPropertyPages = Math.ceil(filteredProperties.length / propertyPageSize) || 1;
+  const paginatedProperties = filteredProperties.slice((propertyPage - 1) * propertyPageSize, propertyPage * propertyPageSize);
 
   return (
     <div className="page-wrapper" style={{ padding: '2.5rem 0 5rem 0' }}>
@@ -469,16 +500,45 @@ const AdminDashboard = () => {
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                   <h2 style={{ fontSize: '1.4rem' }}>Platform Users Directory</h2>
-                  <div style={{ position: 'relative', width: '280px' }}>
-                    <Search size={16} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                    <input
-                      type="text"
-                      placeholder="Search users..."
-                      className="form-input"
-                      value={userSearch}
-                      onChange={(e) => setUserSearch(e.target.value)}
-                      style={{ paddingLeft: '2.5rem' }}
-                    />
+                  <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <div style={{ position: 'relative', width: '220px' }}>
+                      <Search size={16} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                      <input
+                        type="text"
+                        placeholder="Search users..."
+                        className="form-input"
+                        value={userSearch}
+                        onChange={(e) => {
+                          setUserSearch(e.target.value);
+                          setUserPage(1);
+                        }}
+                        style={{ paddingLeft: '2.5rem' }}
+                      />
+                    </div>
+                    <select
+                      className="form-select"
+                      value={userRoleFilter}
+                      onChange={(e) => {
+                        setUserRoleFilter(e.target.value);
+                        setUserPage(1);
+                      }}
+                      style={{ width: '130px' }}
+                    >
+                      <option value="All">All Roles</option>
+                      <option value="Tenant">Tenant</option>
+                      <option value="Owner">Owner</option>
+                      <option value="Admin">Admin</option>
+                    </select>
+                    <select
+                      className="form-select"
+                      value={userSort}
+                      onChange={(e) => setUserSort(e.target.value)}
+                      style={{ width: '140px' }}
+                    >
+                      <option value="name">Sort: Name</option>
+                      <option value="email">Sort: Email</option>
+                      <option value="role">Sort: Role</option>
+                    </select>
                   </div>
                 </div>
 
@@ -493,42 +553,72 @@ const AdminDashboard = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredUsers.map((u) => (
-                        <tr key={u._id}>
-                          <td>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                              <img
-                                src={u.photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80'}
-                                alt={u.name}
-                                style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
-                              />
-                              <div>
-                                <strong>{u.name}</strong>
-                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ID: {u._id}</div>
-                              </div>
-                            </div>
-                          </td>
-                          <td>{u.email}</td>
-                          <td>
-                            <span className="badge badge-role">{u.role}</span>
-                          </td>
-                          <td>
-                            <select
-                              value={u.role}
-                              onChange={(e) => handleRoleChange(u._id, e.target.value)}
-                              className="form-select"
-                              style={{ width: '130px', padding: '0.35rem 0.65rem', fontSize: '0.85rem' }}
-                            >
-                              <option value="Tenant">Tenant</option>
-                              <option value="Owner">Owner</option>
-                              <option value="Admin">Admin</option>
-                            </select>
+                      {paginatedUsers.length === 0 ? (
+                        <tr>
+                          <td colSpan={4} style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--text-muted)' }}>
+                            No users match the search criteria.
                           </td>
                         </tr>
-                      ))}
+                      ) : (
+                        paginatedUsers.map((u) => (
+                          <tr key={u._id}>
+                            <td>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <img
+                                  src={u.photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80'}
+                                  alt={u.name}
+                                  style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+                                />
+                                <div>
+                                  <strong>{u.name}</strong>
+                                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ID: {u._id}</div>
+                                </div>
+                              </div>
+                            </td>
+                            <td>{u.email}</td>
+                            <td>
+                              <span className="badge badge-role">{u.role}</span>
+                            </td>
+                            <td>
+                              <select
+                                value={u.role}
+                                onChange={(e) => handleRoleChange(u._id, e.target.value)}
+                                className="form-select"
+                                style={{ width: '130px', padding: '0.35rem 0.65rem', fontSize: '0.85rem' }}
+                              >
+                                <option value="Tenant">Tenant</option>
+                                <option value="Owner">Owner</option>
+                                <option value="Admin">Admin</option>
+                              </select>
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
+
+                {totalUserPages > 1 && (
+                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.75rem', marginTop: '1.5rem' }}>
+                    <button
+                      onClick={() => setUserPage((p) => Math.max(p - 1, 1))}
+                      disabled={userPage === 1}
+                      className="btn btn-secondary btn-sm"
+                    >
+                      Previous
+                    </button>
+                    <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+                      Page {userPage} of {totalUserPages}
+                    </span>
+                    <button
+                      onClick={() => setUserPage((p) => Math.min(p + 1, totalUserPages))}
+                      disabled={userPage === totalUserPages}
+                      className="btn btn-secondary btn-sm"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
@@ -537,26 +627,44 @@ const AdminDashboard = () => {
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                   <h2 style={{ fontSize: '1.4rem' }}>Property Listings Moderation</h2>
-                  <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <input
+                      type="text"
+                      placeholder="Search listings..."
+                      className="form-input"
+                      value={propertySearch}
+                      onChange={(e) => {
+                        setPropertySearch(e.target.value);
+                        setPropertyPage(1);
+                      }}
+                      style={{ width: '200px' }}
+                    />
                     <select
                       className="form-select"
                       value={propertyFilter}
-                      onChange={(e) => setPropertyFilter(e.target.value)}
-                      style={{ width: '140px' }}
+                      onChange={(e) => {
+                        setPropertyFilter(e.target.value);
+                        setPropertyPage(1);
+                      }}
+                      style={{ width: '135px' }}
                     >
                       <option value="All">All Statuses</option>
                       <option value="Approved">Approved</option>
                       <option value="Pending">Pending</option>
                       <option value="Rejected">Rejected</option>
                     </select>
-                    <input
-                      type="text"
-                      placeholder="Search listings..."
-                      className="form-input"
-                      value={propertySearch}
-                      onChange={(e) => setPropertySearch(e.target.value)}
-                      style={{ width: '220px' }}
-                    />
+                    <select
+                      className="form-select"
+                      value={propertySort}
+                      onChange={(e) => setPropertySort(e.target.value)}
+                      style={{ width: '150px' }}
+                    >
+                      <option value="newest">Newest First</option>
+                      <option value="price-low">Price: Low to High</option>
+                      <option value="price-high">Price: High to Low</option>
+                      <option value="status">Status</option>
+                      <option value="title">Title: A - Z</option>
+                    </select>
                   </div>
                 </div>
 
@@ -572,53 +680,93 @@ const AdminDashboard = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredProperties.map((p) => (
-                        <tr key={p._id}>
-                          <td>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                              <img
-                                src={p.images?.[0] || 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=100&q=80'}
-                                alt={p.title}
-                                style={{ width: '48px', height: '48px', borderRadius: 'var(--radius-sm)', objectFit: 'cover' }}
-                              />
-                              <div>
-                                <strong>{p.title}</strong>
-                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{p.location}</div>
-                              </div>
-                            </div>
-                          </td>
-                          <td><span className="badge badge-approved">{p.propertyType}</span></td>
-                          <td>${p.rentPrice?.toLocaleString()}/{p.rentType?.toLowerCase()}</td>
-                          <td>
-                            <span className={`badge ${p.status === 'Approved' ? 'badge-approved' : p.status === 'Pending' ? 'badge-pending' : 'badge-rejected'}`}>
-                              {p.status}
-                            </span>
-                          </td>
-                          <td style={{ textAlign: 'center' }}>
-                            <div style={{ display: 'inline-flex', gap: '0.4rem' }}>
-                              <Link to={`/properties/${p._id}`} className="btn btn-secondary btn-sm" title="View Details">
-                                <Eye size={15} />
-                              </Link>
-                              {p.status !== 'Approved' && (
-                                <button onClick={() => handleApproveProperty(p._id)} className="btn btn-primary btn-sm" title="Approve">
-                                  <CheckCircle size={15} />
-                                </button>
-                              )}
-                              {p.status !== 'Rejected' && (
-                                <button onClick={() => handleOpenRejectModal(p)} className="btn btn-outline btn-sm" style={{ color: 'var(--warning)', borderColor: 'var(--warning)' }} title="Reject">
-                                  <XCircle size={15} />
-                                </button>
-                              )}
-                              <button onClick={() => handleDeleteProperty(p._id)} className="btn btn-danger btn-sm" title="Delete">
-                                <Trash2 size={15} />
-                              </button>
-                            </div>
+                      {paginatedProperties.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--text-muted)' }}>
+                            No properties match your filter criteria.
                           </td>
                         </tr>
-                      ))}
+                      ) : (
+                        paginatedProperties.map((p) => (
+                          <tr key={p._id}>
+                            <td>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <img
+                                  src={p.images?.[0] || 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=100&q=80'}
+                                  alt={p.title}
+                                  style={{ width: '48px', height: '48px', borderRadius: 'var(--radius-sm)', objectFit: 'cover' }}
+                                />
+                                <div>
+                                  <strong>{p.title}</strong>
+                                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{p.location}</div>
+                                </div>
+                              </div>
+                            </td>
+                            <td><span className="badge badge-approved">{p.propertyType}</span></td>
+                            <td>${p.rentPrice?.toLocaleString()}/{p.rentType?.toLowerCase()}</td>
+                            <td>
+                              <span className={`badge ${p.status === 'Approved' ? 'badge-approved' : p.status === 'Pending' ? 'badge-pending' : 'badge-rejected'}`}>
+                                {p.status}
+                              </span>
+                            </td>
+                            <td style={{ textAlign: 'center' }}>
+                              <div style={{ display: 'inline-flex', gap: '0.4rem' }}>
+                                <Link to={`/properties/${p._id}`} className="btn btn-secondary btn-sm" title="View Details">
+                                  <Eye size={15} />
+                                </Link>
+                                <button
+                                  onClick={() => {
+                                    setEditingProperty(p);
+                                    setEditModalOpen(true);
+                                  }}
+                                  className="btn btn-primary btn-sm"
+                                  title="Edit Listing Details"
+                                >
+                                  <Edit size={15} />
+                                </button>
+                                {p.status !== 'Approved' && (
+                                  <button onClick={() => handleApproveProperty(p._id)} className="btn btn-success btn-sm" style={{ background: 'var(--success)', color: '#ffffff' }} title="Approve">
+                                    <CheckCircle size={15} />
+                                  </button>
+                                )}
+                                {p.status !== 'Rejected' && (
+                                  <button onClick={() => handleOpenRejectModal(p)} className="btn btn-outline btn-sm" style={{ color: 'var(--warning)', borderColor: 'var(--warning)' }} title="Reject">
+                                    <XCircle size={15} />
+                                  </button>
+                                )}
+                                <button onClick={() => handleDeleteProperty(p._id)} className="btn btn-danger btn-sm" title="Delete">
+                                  <Trash2 size={15} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
+
+                {totalPropertyPages > 1 && (
+                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.75rem', marginTop: '1.5rem' }}>
+                    <button
+                      onClick={() => setPropertyPage((p) => Math.max(p - 1, 1))}
+                      disabled={propertyPage === 1}
+                      className="btn btn-secondary btn-sm"
+                    >
+                      Previous
+                    </button>
+                    <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+                      Page {propertyPage} of {totalPropertyPages}
+                    </span>
+                    <button
+                      onClick={() => setPropertyPage((p) => Math.min(p + 1, totalPropertyPages))}
+                      disabled={propertyPage === totalPropertyPages}
+                      className="btn btn-secondary btn-sm"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
@@ -866,6 +1014,21 @@ const AdminDashboard = () => {
         property={moderatingProperty}
         onClose={() => setRejectModalOpen(false)}
         onSubmitFeedback={handleSubmitRejectionFeedback}
+      />
+
+      {/* Edit Property Modal (Remontada Edit Item Form requirement) */}
+      <EditPropertyModal
+        isOpen={editModalOpen}
+        onClose={() => {
+          setEditModalOpen(false);
+          setEditingProperty(null);
+        }}
+        property={editingProperty}
+        onPropertyUpdated={(updated) => {
+          setProperties((prev) =>
+            prev.map((p) => (p._id === updated._id ? { ...p, ...updated } : p))
+          );
+        }}
       />
     </div>
   );
